@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RotaSystem - Sistema de Telemetria de Frios</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="./styles/index.css">
+    <!-- Adicionar Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <img src="/logo.png" alt="RotaSystem Logo">
+            </div>
+            
+            <ul class="menu">
+                <li><a href="index.html" class="active"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="veiculos.html"><i class="fas fa-truck"></i> Veículos</a></li>
+                <li><a href="rotas.html"><i class="fas fa-route"></i> Rotas</a></li>
+                <li><a href="temperaturas.html"><i class="fas fa-thermometer-half"></i> Temperaturas</a></li>
+                <li><a href="alertas.html"><i class="fas fa-exclamation-triangle"></i> Alertas</a></li>
+                <li><a href="#"><i class="fas fa-sign-out-alt"></i> Sair</a></li>
+            </ul>
+            
+            <!-- Nova logo adicionada no final do sidebar -->
+            <div class="logo-bottom">
+                <img src="niju.png" alt="Niju Logo" class="bottom-logo">
+            </div>
+        </aside>
+                
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <div class="page-title">
+                    <h2>Dashboard - Telemetria de Frios</h2>
+                </div>
+                <div class="user-info">
+                    <img src="https://ui-avatars.com/api/?name=Operador&background=2EA7AD&color=fff" alt="User">
+                    <span>Operador</span>
+                </div>
+            </div>
+            
+            <!-- Dashboard Cards -->
+            <div class="dashboard-cards">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Frota Monitorada</div>
+                        <div class="card-icon temp">
+                            <i class="fas fa-truck"></i>
+                        </div>
+                    </div>
+                    <div class="card-value" id="total-vehicles">-</div>
+                    <div class="card-footer">
+                        <a href="veiculos.html" style="color: var(--secondary); text-decoration: none; font-weight: 500;">Ver mais</a>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Temperatura Média</div>
+                        <div class="card-icon temp">
+                            <i class="fas fa-thermometer-half"></i>
+                        </div>
+                    </div>
+                    <div class="card-value" id="avg-temperature">-</div>
+                    <div class="card-footer">
+                        <a href="temperaturas.html" style="color: var(--secondary); text-decoration: none; font-weight: 500;">Ver mais</a>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Alertas Ativos</div>
+                        <div class="card-icon alert">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                    </div>
+                    <div class="card-value" id="active-alerts">-</div>
+                    <div class="card-footer">
+                        <a href="alertas.html" style="color: var(--secondary); text-decoration: none; font-weight: 500;">Ver mais</a>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Economia de Combustível</div>
+                        <div class="card-icon ok">
+                            <i class="fas fa-gas-pump"></i>
+                        </div>
+                    </div>
+                    <div class="card-value" id="fuel-economy">-</div>
+                    <div class="card-footer">
+                        <span>Meta: 8.2 km/L</span>
+                        <span class="status warning" id="fuel-variation">-</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Charts -->
+            <div class="charts-container">
+                <div class="chart">
+                    <div class="chart-header">
+                        <div class="chart-title">Temperatura por Veículo</div>
+                        <button class="btn btn-primary">Ver Detalhes</button>
+                    </div>
+                    <div class="chart-placeholder">
+                        <canvas id="temperatureChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart">
+                    <div class="chart-header">
+                        <div class="chart-title">Status da Frota</div>
+                        <button class="btn btn-primary">Filtrar</button>
+                    </div>
+                    <div class="chart-placeholder">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Vehicle List -->
+            <div class="vehicle-list">
+                <div class="list-header">
+                    <div class="list-title">Veículos com Monitoramento de Temperatura</div>
+                    <div>
+                        <button class="btn btn-primary" onclick="window.location.href='veiculos.html'" style="margin-right: 10px;">
+                            Ver Todos
+                        </button>
+                        <button class="btn btn-secondary" id="export-btn">Exportar</button>
+                    </div>
+                </div>
+                
+                <table class="vehicle-table">
+                    <thead>
+                        <tr>
+                            <th>Veículo</th>
+                            <th>Motorista</th>
+                            <th>Rota</th>
+                            <th>Temperatura Média</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="vehicle-table-body">
+                        <!-- Os dados serão carregados via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal de Detalhes do Veículo -->
+    <div class="modal-overlay" id="vehicleModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Detalhes do Veículo</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="vehicle-details">
+                    <div class="detail-group">
+                        <div class="detail-label">Veículo</div>
+                        <div class="detail-value" id="modal-vehicle">-</div>
+                    </div>
+                    <div class="detail-group">
+                        <div class="detail-label">Motorista</div>
+                        <div class="detail-value" id="modal-driver">-</div>
+                    </div>
+                    <div class="detail-group">
+                        <div class="detail-label">Rota</div>
+                        <div class="detail-value" id="modal-route">-</div>
+                    </div>
+                    <div class="detail-group">
+                        <div class="detail-label">Status Geral</div>
+                        <div class="detail-value" id="modal-status">-</div>
+                    </div>
+                    <div class="detail-group">
+                        <div class="detail-label">Temperatura Média</div>
+                        <div class="detail-value" id="modal-temp">-</div>
+                    </div>
+                    <div class="detail-group">
+                        <div class="detail-label">Última Atualização</div>
+                        <div class="detail-value" id="modal-update">-</div>
+                    </div>
+                    <div class="detail-group">
+                        <div class="detail-label">Velocidade</div>
+                        <div class="detail-value" id="modal-speed">-</div>
+                    </div>
+                    <div class="detail-group">
+                        <div class="detail-label">Combustível</div>
+                        <div class="detail-value" id="modal-fuel">-</div>
+                    </div>
+                </div>
+                
+                <div class="sensors-container">
+                    <h4 class="history-title">Leituras de Todos os Sensores</h4>
+                    <div class="sensors-grid" id="modal-sensors">
+                        <!-- Os dados dos sensores serão inseridos via JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="temperature-history">
+                    <h4 class="history-title">Histórico de Temperatura (últimas 24h)</h4>
+                    <div class="history-chart">
+                        <canvas id="historyChart"></canvas>
+                    </div>
+                    
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Horário</th>
+                                <th>Temperatura Média</th>
+                                <th>Status</th>
+                                <th>Localização</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modal-history">
+                            <!-- Os dados do histórico serão inseridos via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="modal-report">Gerar Relatório</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="./scripts/index.js"></script>
+</body>
+</html>

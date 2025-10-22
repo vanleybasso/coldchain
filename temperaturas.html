@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RotaSystem - Monitoramento de Temperaturas</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Adicionar Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="./styles/temperaturas.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <img src="/logo.png" alt="RotaSystem Logo">
+            </div>
+            
+            <ul class="menu">
+                <li><a href="index.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="veiculos.html"><i class="fas fa-truck"></i> Veículos</a></li>
+                <li><a href="rotas.html"><i class="fas fa-route"></i> Rotas</a></li>
+                <li><a href="temperaturas.html" class="active"><i class="fas fa-thermometer-half"></i> Temperaturas</a></li>
+                <li><a href="alertas.html"><i class="fas fa-exclamation-triangle"></i> Alertas</a></li>
+                <li><a href="#"><i class="fas fa-sign-out-alt"></i> Sair</a></li>
+            </ul>
+            
+            <!-- Nova logo adicionada no final do sidebar -->
+            <div class="logo-bottom">
+                <img src="niju.png" alt="Niju Logo" class="bottom-logo">
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <div class="page-title">
+                    <h2>Monitoramento de Temperaturas</h2>
+                </div>
+                <div class="user-info">
+                    <img src="https://ui-avatars.com/api/?name=Operador&background=2EA7AD&color=fff" alt="User">
+                    <span>Operador</span>
+                </div>
+            </div>
+            
+            <!-- Filters -->
+            <div class="filters">
+                <div class="filter-header">
+                    <div class="filter-title">Filtros de Temperatura</div>
+                    <button class="btn btn-secondary" id="clearFiltersBtn">
+                        <i class="fas fa-sync-alt"></i> Limpar Filtros
+                    </button>
+                </div>
+                
+                <form class="filter-form" id="filterForm">
+                    <div class="form-group">
+                        <label for="date-range">Período</label>
+                        <select id="date-range" class="form-control">
+                            <option value="today">Hoje</option>
+                            <option value="yesterday">Ontem</option>
+                            <option value="week">Esta Semana</option>
+                            <option value="month">Este Mês</option>
+                            <option value="custom">Personalizado</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="vehicle">Veículo</label>
+                        <select id="vehicle" class="form-control">
+                            <option value="">Todos os Veículos</option>
+                            <option value="VLC-1023">VLC-1023 - Mercedes Sprinter</option>
+                            <option value="VLC-2087">VLC-2087 - Volkswagen Delivery</option>
+                            <option value="VLC-3054">VLC-3054 - Ford Transit</option>
+                            <option value="VLC-4098">VLC-4098 - Fiat Ducato</option>
+                            <option value="VLC-5021">VLC-5021 - Renault Master</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="status">Status de Temperatura</label>
+                        <select id="status" class="form-control">
+                            <option value="">Todos</option>
+                            <option value="normal">Normal (2°C a 5°C)</option>
+                            <option value="warning">Alerta (5°C a 7°C)</option>
+                            <option value="critical">Crítico (> 7°C)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="route">Rota</label>
+                        <select id="route" class="form-control">
+                            <option value="">Todas as Rotas</option>
+                            <option value="centro">Centro</option>
+                            <option value="zona-norte">Zona Norte</option>
+                            <option value="zona-sul">Zona Sul</option>
+                            <option value="zona-leste">Zona Leste</option>
+                            <option value="zona-oeste">Zona Oeste</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Temperature Overview -->
+            <div class="temp-overview">
+                <div class="temp-card">
+                    <div class="temp-card-header">
+                        <div class="temp-card-title">Temperatura Média</div>
+                        <div class="temp-card-icon normal">
+                            <i class="fas fa-thermometer-half"></i>
+                        </div>
+                    </div>
+                    <div class="temp-card-value">3.4°C</div>
+                    <div class="temp-card-footer">
+                        <span>Faixa ideal: 2°C a 5°C</span>
+                        <span class="status normal">Estável</span>
+                    </div>
+                </div>
+                
+                <div class="temp-card">
+                    <div class="temp-card-header">
+                        <div class="temp-card-title">Temperatura Máxima</div>
+                        <div class="temp-card-icon critical">
+                            <i class="fas fa-temperature-high"></i>
+                        </div>
+                    </div>
+                    <div class="temp-card-value">8.1°C</div>
+                    <div class="temp-card-footer">
+                        <span>Veículo: VLC-2087</span>
+                        <span class="status alert">Crítico</span>
+                    </div>
+                </div>
+                
+                <div class="temp-card">
+                    <div class="temp-card-header">
+                        <div class="temp-card-title">Temperatura Mínima</div>
+                        <div class="temp-card-icon warning">
+                            <i class="fas fa-temperature-low"></i>
+                        </div>
+                    </div>
+                    <div class="temp-card-value">1.2°C</div>
+                    <div class="temp-card-footer">
+                        <span>Veículo: VLC-5021</span>
+                        <span class="status warning">Atenção</span>
+                    </div>
+                </div>
+                
+                <div class="temp-card">
+                    <div class="temp-card-header">
+                        <div class="temp-card-title">Veículos em Alerta</div>
+                        <div class="temp-card-icon critical">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                    </div>
+                    <div class="temp-card-value">3 Veículos</div>
+                    <div class="temp-card-footer">
+                        <span>2 críticos, 1 em atenção</span>
+                        <span class="status alert">Intervir</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Charts -->
+            <div class="charts-container">
+                <div class="chart">
+                    <div class="chart-header">
+                        <div class="chart-title">Variação de Temperatura por Hora</div>
+                        <button class="btn btn-primary" id="exportChartBtn">
+                            <i class="fas fa-download"></i> Exportar
+                        </button>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="temperatureChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart">
+                    <div class="chart-header">
+                        <div class="chart-title">Distribuição de Status</div>
+                        <button class="btn btn-primary" id="filterChartBtn">
+                            <i class="fas fa-filter"></i> Filtrar
+                        </button>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Temperature History -->
+            <div class="temp-history">
+                <div class="history-header">
+                    <div class="history-title">Histórico de Temperaturas</div>
+                    <button class="btn btn-secondary" id="exportReportBtn">
+                        <i class="fas fa-file-export"></i> Exportar Relatório
+                    </button>
+                </div>
+                
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Data/Hora</th>
+                            <th>Veículo</th>
+                            <th>Motorista</th>
+                            <th>Temperatura Média</th>
+                            <th>Status</th>
+                            <th>Localização</th>
+                        </tr>
+                    </thead>
+                    <tbody id="temperatureTableBody">
+                        <!-- Os dados serão carregados via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal de Detalhes -->
+    <div class="modal-overlay" id="detailsModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Detalhes da Leitura de Temperatura</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-details">
+                    <div class="detail-card">
+                        <div class="detail-card-title">Temperatura Atual</div>
+                        <div class="detail-card-value normal" id="modal-temp">3.2°C</div>
+                    </div>
+                    <div class="detail-card">
+                        <div class="detail-card-title">Status</div>
+                        <div class="detail-card-value normal" id="modal-status">Normal</div>
+                    </div>
+                    <div class="detail-card">
+                        <div class="detail-card-title">Faixa Ideal</div>
+                        <div class="detail-card-value" id="modal-range">2°C a 5°C</div>
+                    </div>
+                    <div class="detail-card">
+                        <div class="detail-card-title">Variação desde última leitura</div>
+                        <div class="detail-card-value normal" id="modal-variation">+0.3°C</div>
+                    </div>
+                </div>
+                
+                <div class="modal-section">
+                    <h4 class="modal-section-title">Informações do Veículo</h4>
+                    <div class="modal-section-content">
+                        <div class="info-item">
+                            <span class="info-label">Veículo</span>
+                            <span class="info-value" id="modal-vehicle">VLC-1023 - Mercedes Sprinter</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Motorista</span>
+                            <span class="info-value" id="modal-driver">Carlos Silva</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Placa</span>
+                            <span class="info-value" id="modal-plate">VLC-1023</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Modelo</span>
+                            <span class="info-value" id="modal-model">Mercedes Sprinter</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-section">
+                    <h4 class="modal-section-title">Informações da Rota</h4>
+                    <div class="modal-section-content">
+                        <div class="info-item">
+                            <span class="info-label">Localização</span>
+                            <span class="info-value" id="modal-location">Centro</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Data/Hora</span>
+                            <span class="info-value" id="modal-datetime">10/09/2023 14:25</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Velocidade</span>
+                            <span class="info-value" id="modal-speed">45 km/h</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Última atualização</span>
+                            <span class="info-value" id="modal-updated">2 minutos atrás</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Nova seção: Leituras de Todos os Sensores -->
+                <div class="modal-section">
+                    <h4 class="modal-section-title">Leituras de Todos os Sensores</h4>
+                    <div id="sensors-container" class="sensors-grid">
+                        <!-- Os sensores serão inseridos aqui via JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="modal-section">
+                    <h4 class="modal-section-title">Histórico Recente (últimas 2 horas)</h4>
+                    <div class="modal-chart-container">
+                        <canvas id="modalHistoryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="modal-close-btn">Fechar</button>
+                <button class="btn btn-primary" id="modal-action-btn">
+                    <i class="fas fa-exclamation-circle"></i> Gerar Relatório de Incidente
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="./scripts/temperaturas.js"></script>
+</body>
+</html>

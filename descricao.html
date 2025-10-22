@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes do Veículo - RotaSystem</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="./styles/descricao.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <img src="/logo.png" alt="RotaSystem Logo">
+            </div>
+            
+            <ul class="menu">
+                <li><a href="index.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="veiculos.html" class="active"><i class="fas fa-truck"></i> Veículos</a></li>
+                <li><a href="rotas.html"><i class="fas fa-route"></i> Rotas</a></li>
+                <li><a href="temperaturas.html"><i class="fas fa-thermometer-half"></i> Temperaturas</a></li>
+                <li><a href="alertas.html"><i class="fas fa-exclamation-triangle"></i> Alertas</a></li>
+                <li><a href="#"><i class="fas fa-sign-out-alt"></i> Sair</a></li>
+            </ul>
+            
+            <!-- Nova logo adicionada no final do sidebar -->
+            <div class="logo-bottom">
+                <img src="niju.png" alt="Niju Logo" class="bottom-logo">
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <div class="page-title">
+                    <h2 id="page-title">Detalhes do Veículo</h2>
+                </div>
+                <div class="user-info">
+                    <img src="https://ui-avatars.com/api/?name=Operador&background=2EA7AD&color=fff" alt="User">
+                    <span>Operador</span>
+                </div>
+            </div>
+            
+            <!-- Vehicle Overview -->
+            <div class="vehicle-overview">
+                <div class="vehicle-card">
+                    <div class="card-header">
+                        <div class="card-title">Informações do Veículo</div>
+                        <span class="status-badge" id="vehicle-status">Ativo</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="info-item">
+                            <div class="info-label">Placa</div>
+                            <div class="info-value" id="vehicle-plate">--</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Modelo</div>
+                            <div class="info-value" id="vehicle-model">--</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Ano</div>
+                            <div class="info-value" id="vehicle-year">--</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Capacidade</div>
+                            <div class="info-value" id="vehicle-capacity">--</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Tipo</div>
+                            <div class="info-value" id="vehicle-type">--</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Motorista</div>
+                            <div class="info-value" id="vehicle-driver">--</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="vehicle-card">
+                    <div class="card-header">
+                        <div class="card-title">Status da Operação</div>
+                    </div>
+                    <div class="card-content">
+                        <div class="info-item">
+                            <div class="info-label">Rota Atual</div>
+                            <div class="info-value" id="vehicle-route">--</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Status da Viagem</div>
+                            <div class="info-value" id="vehicle-trip-status">--</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Última Atualização</div>
+                            <div class="info-value" id="vehicle-last-update">--</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Localização</div>
+                            <div class="info-value" id="vehicle-location">--</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Temperatura Média</div>
+                            <div class="info-value" id="vehicle-avg-temp">--</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Próxima Parada</div>
+                            <div class="info-value" id="vehicle-next-stop">--</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Vehicle Visualization -->
+            <div class="vehicle-visualization">
+                <div class="truck-container">
+                    <div class="container-glow"></div>
+                    
+                    <!-- Truck Body -->
+                    <div class="truck-body">
+                        <div class="truck-cabin">
+                            CABINE
+                        </div>
+                        
+                        <div class="truck-trailer">
+                            <!-- Porta Traseira -->
+                            <div class="door" id="traseira">
+                                <i class="fas fa-door-closed"></i>
+                            </div>
+                            
+                            <!-- Sensores de temperatura -->
+                            <div class="sensor sensor-normal" style="top: 30%; left: 25%;" data-sensor="principal">
+                                <i class="fas fa-thermometer-half"></i>
+                            </div>
+                            
+                            <div class="sensor sensor-normal" style="top: 30%; left: 50%;" data-sensor="meio">
+                                <i class="fas fa-thermometer-half"></i>
+                            </div>
+                            
+                            <div class="sensor sensor-warning" style="top: 30%; left: 75%;" data-sensor="porta">
+                                <i class="fas fa-thermometer-half"></i>
+                            </div>
+                            
+                            <div class="sensor sensor-normal" style="top: 60%; left: 25%;" data-sensor="fundo">
+                                <i class="fas fa-thermometer-half"></i>
+                            </div>
+                            
+                            <div class="sensor sensor-normal" style="top: 60%; left: 50%;" data-sensor="piso">
+                                <i class="fas fa-thermometer-half"></i>
+                            </div>
+                            
+                            <div class="sensor sensor-normal" style="top: 60%; left: 75%;" data-sensor="teto">
+                                <i class="fas fa-thermometer-half"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Sensor Externo -->
+                    <div class="sensor sensor-normal" style="top: 10%; left: 90%;" data-sensor="externo">
+                        <i class="fas fa-sun"></i>
+                    </div>
+                </div>
+                
+                <!-- Sensor Details Panel -->
+                <div class="sensor-details">
+                    <div class="sensor-details-header">
+                        <div class="sensor-details-title">Detalhes do Sensor</div>
+                    </div>
+                    <div class="sensor-details-content">
+                        <div class="sensor-details-icon">
+                            <i class="fas fa-thermometer-half"></i>
+                        </div>
+                        <div class="sensor-details-value" id="sensor-value">--</div>
+                        <div class="sensor-details-label" id="sensor-name">Selecione um sensor</div>
+                        <div class="sensor-details-status status-badge status-inactive" id="sensor-status">--</div>
+                        
+                        <div class="sensor-details-info">
+                            <div class="sensor-details-info-item">
+                                <div class="sensor-details-info-label">Localização:</div>
+                                <div class="sensor-details-info-value" id="sensor-location">--</div>
+                            </div>
+                            <div class="sensor-details-info-item">
+                                <div class="sensor-details-info-label">Última leitura:</div>
+                                <div class="sensor-details-info-value" id="sensor-last-read">--</div>
+                            </div>
+                            <div class="sensor-details-info-item">
+                                <div class="sensor-details-info-label">Status:</div>
+                                <div class="sensor-details-info-value" id="sensor-status-text">--</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Dashboard -->
+            <div class="dashboard">
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <div class="card-title">Consumo de Combustível</div>
+                    </div>
+                    <div class="dashboard-value" id="fuel-consumption">--</div>
+                    <div class="dashboard-label">Média de consumo</div>
+                    <div class="dashboard-change positive" id="fuel-change">
+                        <i class="fas fa-arrow-down"></i> 2.3% em relação ao mês anterior
+                    </div>
+                </div>
+                
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <div class="card-title">Temperatura Média</div>
+                    </div>
+                    <div class="dashboard-value" id="avg-temperature">--</div>
+                    <div class="dashboard-label">Faixa ideal: 2°C a 5°C</div>
+                    <div class="dashboard-change positive" id="temp-status">
+                        <i class="fas fa-check-circle"></i> Dentro da faixa ideal
+                    </div>
+                </div>
+                
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <div class="card-title">Portas</div>
+                    </div>
+                    <div class="dashboard-value" id="doors-status">--</div>
+                    <div class="dashboard-label">Porta traseira fechada</div>
+                    <div class="dashboard-change positive" id="doors-change">
+                        <i class="fas fa-check-circle"></i> Status normal
+                    </div>
+                </div>
+                
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <div class="card-title">Status do Refrigerador</div>
+                    </div>
+                    <div class="dashboard-value" id="refrigerator-status">--</div>
+                    <div class="dashboard-label">Consumo: 45%</div>
+                    <div class="dashboard-change positive" id="refrigerator-change">
+                        <i class="fas fa-check-circle"></i> Operação normal
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sensors Grid -->
+            <div class="vehicle-card">
+                <div class="card-header">
+                    <div class="card-title">Todos os Sensores</div>
+                </div>
+                <div class="sensors-grid" id="sensors-grid">
+                    <!-- Os sensores serão carregados dinamicamente aqui -->
+                </div>
+            </div>
+            
+            <!-- Temperature Chart -->
+            <div class="temperature-chart">
+                <div class="card-header">
+                    <div class="card-title">Variação de Temperatura (Últimas 24h)</div>
+                </div>
+                <div class="chart-placeholder">
+                    Gráfico de variação de temperatura seria exibido aqui
+                </div>
+            </div>
+            
+            <!-- Actions -->
+            <div class="actions">
+                <button class="btn btn-secondary">
+                    <i class="fas fa-print"></i> Imprimir Relatório
+                </button>
+                <button class="btn btn-primary">
+                    <i class="fas fa-history"></i> Histórico Completo
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <script src="./scripts/descricao.js"></script>
+</body>
+</html>

@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RotaSystem - Gestão de Rotas</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Adicionar Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="./styles/rotas.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <img src="/logo.png" alt="RotaSystem Logo">
+            </div>
+            
+            <ul class="menu">
+                <li><a href="index.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="veiculos.html"><i class="fas fa-truck"></i> Veículos</a></li>
+                <li><a href="rotas.html" class="active"><i class="fas fa-route"></i> Rotas</a></li>
+                <li><a href="temperaturas.html"><i class="fas fa-thermometer-half"></i> Temperaturas</a></li>
+                <li><a href="alertas.html"><i class="fas fa-exclamation-triangle"></i> Alertas</a></li>
+                <li><a href="#"><i class="fas fa-sign-out-alt"></i> Sair</a></li>
+            </ul>
+            
+            <!-- Nova logo adicionada no final do sidebar -->
+            <div class="logo-bottom">
+                <img src="niju.png" alt="Niju Logo" class="bottom-logo">
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <div class="page-title">
+                    <h2>Gestão de Rotas</h2>
+                </div>
+                <div class="user-info">
+                    <img src="https://ui-avatars.com/api/?name=Operador&background=2EA7AD&color=fff" alt="User">
+                    <span>Operador</span>
+                </div>
+            </div>
+            
+            <!-- Filters -->
+            <div class="filters">
+                <div class="filter-header">
+                    <div class="filter-title">Filtros</div>
+                    <button class="btn btn-secondary btn-sm" id="clearFiltersBtn">
+                        <i class="fas fa-sync-alt"></i> Limpar Filtros
+                    </button>
+                </div>
+                
+                <form class="filter-form" id="filterForm">
+                    <div class="form-group">
+                        <label for="search">Nome da Rota</label>
+                        <input type="text" id="search" class="form-control" placeholder="Digite o nome da rota...">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="status">Status</label>
+                        <select id="status" class="form-control">
+                            <option value="">Todos</option>
+                            <option value="active">Ativa</option>
+                            <option value="inactive">Inativa</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="region">Região</label>
+                        <select id="region" class="form-control">
+                            <option value="">Todas</option>
+                            <option value="centro">Centro</option>
+                            <option value="zona-norte">Zona Norte</option>
+                            <option value="zona-sul">Zona Sul</option>
+                            <option value="zona-leste">Zona Leste</option>
+                            <option value="zona-oeste">Zona Oeste</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="vehicle">Tipo de Veículo</label>
+                        <select id="vehicle" class="form-control">
+                            <option value="">Todos</option>
+                            <option value="small">Pequeno</option>
+                            <option value="medium">Médio</option>
+                            <option value="large">Grande</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Actions -->
+            <div class="actions">
+                <div class="left-actions">
+                    <button class="btn btn-primary" id="addRouteBtn">
+                        <i class="fas fa-plus"></i> Nova Rota
+                    </button>
+                    <button class="btn btn-secondary" id="exportBtn">
+                        <i class="fas fa-file-export"></i> Exportar
+                    </button>
+                </div>
+                <div class="right-actions">
+                    <button class="btn btn-success" id="refreshBtn">
+                        <i class="fas fa-sync-alt"></i> Atualizar
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Routes List -->
+            <div class="routes-list">
+                <div class="list-header">
+                    <div class="list-title">Todas as Rotas</div>
+                    <div class="list-info" id="routeCount">Carregando...</div>
+                </div>
+                
+                <table class="routes-table">
+                    <thead>
+                        <tr>
+                            <th>Nome da Rota</th>
+                            <th>Origem - Destino</th>
+                            <th>Distância</th>
+                            <th>Tempo Médio</th>
+                            <th>Veículos</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="routesTableBody">
+                        <!-- Os dados serão carregados via JavaScript -->
+                    </tbody>
+                </table>
+                
+                <!-- Pagination -->
+                <div class="pagination" id="pagination">
+                    <!-- A paginação será gerada via JavaScript -->
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Add Route Modal -->
+    <div class="modal" id="addRouteModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Adicionar Nova Rota</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form class="modal-form" id="addRouteForm">
+                    <div class="form-group">
+                        <label for="route-name">Nome da Rota</label>
+                        <input type="text" id="route-name" class="form-control" placeholder="Ex: Rota Centro-Sul" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="origin">Origem</label>
+                        <input type="text" id="origin" class="form-control" placeholder="Local de origem" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="destination">Destino</label>
+                        <input type="text" id="destination" class="form-control" placeholder="Local de destino" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="distance">Distância (km)</label>
+                        <input type="number" id="distance" class="form-control" placeholder="Ex: 18.5" step="0.1" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="time">Tempo Médio (minutos)</label>
+                        <input type="number" id="time" class="form-control" placeholder="Ex: 45" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="route-status">Status</label>
+                        <select id="route-status" class="form-control" required>
+                            <option value="active">Ativa</option>
+                            <option value="inactive">Inativa</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label for="route-notes">Observações</label>
+                        <textarea id="route-notes" class="form-control" rows="3" placeholder="Informações adicionais sobre a rota..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelAddRoute">Cancelar</button>
+                <button class="btn btn-primary" id="saveRouteBtn">Salvar Rota</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Route Details Modal -->
+    <div class="modal" id="routeDetailsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Detalhes da Rota</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="route-details">
+                    <div class="detail-card">
+                        <h4>Informações da Rota</h4>
+                        <div class="detail-item">
+                            <span class="detail-label">Nome:</span>
+                            <span class="detail-value" id="detail-nome">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Origem:</span>
+                            <span class="detail-value" id="detail-origem">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Destino:</span>
+                            <span class="detail-value" id="detail-destino">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Distância:</span>
+                            <span class="detail-value" id="detail-distancia">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Tempo Médio:</span>
+                            <span class="detail-value" id="detail-tempo">-</span>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-card">
+                        <h4>Estatísticas</h4>
+                        <div class="detail-item">
+                            <span class="detail-label">Veículos na Rota:</span>
+                            <span class="detail-value" id="detail-veiculos">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Entregas/Dia:</span>
+                            <span class="detail-value" id="detail-entregas">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Consumo Médio:</span>
+                            <span class="detail-value" id="detail-consumo">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Status:</span>
+                            <span class="detail-value" id="detail-status">-</span>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-card">
+                        <h4>Monitoramento de Temperatura</h4>
+                        <div class="detail-item">
+                            <span class="detail-label">Temperatura Média:</span>
+                            <span class="detail-value" id="detail-temp-media">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Status:</span>
+                            <span class="detail-value" id="detail-temp-status">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Faixa Ideal:</span>
+                            <span class="detail-value" id="detail-temp-range">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Última Atualização:</span>
+                            <span class="detail-value" id="detail-temp-update">-</span>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-card">
+                        <h4>Motoristas</h4>
+                        <div class="detail-item">
+                            <span class="detail-label">Principal:</span>
+                            <span class="detail-value" id="detail-motorista-principal">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Suplentes:</span>
+                            <span class="detail-value" id="detail-motorista-suplentes">-</span>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-card">
+                        <h4>Horários</h4>
+                        <div class="detail-item">
+                            <span class="detail-label">Primeira Saída:</span>
+                            <span class="detail-value" id="detail-primeira-saida">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Última Saída:</span>
+                            <span class="detail-value" id="detail-ultima-saida">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Frequência:</span>
+                            <span class="detail-value" id="detail-frequencia">-</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Nova seção: Leituras de Sensores -->
+                    <div class="detail-card" style="grid-column: 1 / span 2;">
+                        <h4>Leituras de Sensores</h4>
+                        <div id="sensors-container" class="sensors-grid">
+                            <!-- Os sensores serão inseridos aqui via JavaScript -->
+                        </div>
+                    </div>
+                    
+                    <div class="map-container">
+                        <div class="map-header">
+                            <h4>Mapa da Rota</h4>
+                            <div class="map-controls">
+                                <button class="btn btn-sm btn-secondary" id="zoomInBtn">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                                <button class="btn btn-sm btn-secondary" id="zoomOutBtn">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <button class="btn btn-sm btn-secondary" id="resetViewBtn">
+                                    <i class="fas fa-home"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="routeMap" class="route-map"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary close-details">Fechar</button>
+                <button class="btn btn-primary" id="editRouteBtn">Editar Rota</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Adicionar Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="./scripts/rotas.js"></script>
+</body>
+</html>

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RotaSystem - Gestão de Veículos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="./styles/veiculos.css">
+    <!-- Adicionar Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <img src="/logo.png" alt="RotaSystem Logo">
+            </div>
+            
+            <ul class="menu">
+                <li><a href="index.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="veiculos.html" class="active"><i class="fas fa-truck"></i> Veículos</a></li>
+                <li><a href="rotas.html"><i class="fas fa-route"></i> Rotas</a></li>
+                <li><a href="temperaturas.html"><i class="fas fa-thermometer-half"></i> Temperaturas</a></li>
+                <li><a href="alertas.html"><i class="fas fa-exclamation-triangle"></i> Alertas</a></li>
+                <li><a href="#"><i class="fas fa-sign-out-alt"></i> Sair</a></li>
+            </ul>
+            
+            <!-- Nova logo adicionada no final do sidebar -->
+            <div class="logo-bottom">
+                <img src="niju.png" alt="Niju Logo" class="bottom-logo">
+            </div>
+        </aside>
+                
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <div class="page-title">
+                    <h2>Gestão de Veículos</h2>
+                </div>
+                <div class="user-info">
+                    <img src="https://ui-avatars.com/api/?name=Operador&background=2EA7AD&color=fff" alt="User">
+                    <span>Operador</span>
+                </div>
+            </div>
+            
+            <!-- Filtros -->
+            <div class="filters">
+                <div class="filter-header">
+                    <div class="filter-title">Filtros e Pesquisa</div>
+                </div>
+                <form id="filterForm" class="filter-form">
+                    <div class="form-group">
+                        <label for="search">Pesquisar</label>
+                        <input type="text" id="search" class="form-control" placeholder="Placa ou motorista...">
+                    </div>
+                    <div class="form-group">
+                        <label for="status">Status</label>
+                        <select id="status" class="form-control">
+                            <option value="">Todos</option>
+                            <option value="Normal">Normal</option>
+                            <option value="Atenção">Atenção</option>
+                            <option value="inactive">Inativo</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="temperature">Temperatura</label>
+                        <select id="temperature" class="form-control">
+                            <option value="">Todas</option>
+                            <option value="normal">Normal (2-5°C)</option>
+                            <option value="warning">Atenção (5-7°C)</option>
+                            <option value="critical">Crítico (>7°C)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="route">Rota</label>
+                        <select id="route" class="form-control">
+                            <option value="">Todas</option>
+                            <option value="Centro - Zona Sul">Centro - Zona Sul</option>
+                            <option value="Zona Norte - Centro">Zona Norte - Centro</option>
+                            <option value="Zona Leste - Centro">Zona Leste - Centro</option>
+                            <option value="Zona Oeste - Centro">Zona Oeste - Centro</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Ações -->
+            <div class="actions">
+                <div class="left-actions">
+                    <button class="btn btn-primary" id="addVehicleBtn">
+                        <i class="fas fa-plus"></i> Adicionar Veículo
+                    </button>
+                    <button class="btn btn-secondary" id="refreshBtn">
+                        <i class="fas fa-sync-alt"></i> Atualizar
+                    </button>
+                    <button class="btn btn-success" id="exportBtn">
+                        <i class="fas fa-download"></i> Exportar
+                    </button>
+                    <button class="btn btn-danger" id="clearFiltersBtn">
+                        <i class="fas fa-times"></i> Limpar Filtros
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Vehicle List -->
+            <div class="vehicle-list">
+                <div class="list-header">
+                    <div class="list-title">Frota de Veículos</div>
+                    <div id="vehicleCount">Carregando...</div>
+                </div>
+                
+                <table class="vehicle-table">
+                    <thead>
+                        <tr>
+                            <th>Placa</th>
+                            <th>Modelo</th>
+                            <th>Motorista</th>
+                            <th>Rota</th>
+                            <th>Temperatura</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="vehicleTableBody">
+                        <!-- Os dados serão carregados via JavaScript -->
+                    </tbody>
+                </table>
+                
+                <!-- Paginação -->
+                <div class="pagination" id="pagination">
+                    <!-- A paginação será gerada via JavaScript -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal de Adicionar Veículo -->
+    <div class="modal" id="addVehicleModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Adicionar Novo Veículo</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="addVehicleForm" class="modal-form">
+                    <div class="form-group">
+                        <label for="plate">Placa do Veículo *</label>
+                        <input type="text" id="plate" name="plate" class="form-control" placeholder="Ex: VLC-1234" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="model">Modelo *</label>
+                        <input type="text" id="model" name="model" class="form-control" placeholder="Ex: Mercedes Sprinter" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="driver">Motorista *</label>
+                        <input type="text" id="driver" name="driver" class="form-control" placeholder="Nome do motorista" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="modalRoute">Rota *</label>
+                        <select id="modalRoute" name="modalRoute" class="form-control" required>
+                            <option value="">Selecione uma rota</option>
+                            <option value="Centro - Zona Sul">Centro - Zona Sul</option>
+                            <option value="Zona Norte - Centro">Zona Norte - Centro</option>
+                            <option value="Zona Leste - Centro">Zona Leste - Centro</option>
+                            <option value="Zona Oeste - Centro">Zona Oeste - Centro</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="modalStatus">Status *</label>
+                        <select id="modalStatus" name="modalStatus" class="form-control" required>
+                            <option value="Normal">Normal</option>
+                            <option value="Atenção">Atenção</option>
+                            <option value="inactive">Inativo</option>
+                        </select>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="notes">Observações</label>
+                        <textarea id="notes" name="notes" class="form-control" placeholder="Observações adicionais..." rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelAddVehicle">Cancelar</button>
+                <button class="btn btn-primary" id="saveVehicleBtn">Salvar Veículo</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Detalhes do Veículo -->
+    <div class="modal" id="vehicleDetailsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Detalhes do Veículo</h3>
+                <button class="close-modal close-details">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="vehicle-details">
+                    <!-- Informações do Veículo -->
+                    <div class="detail-card">
+                        <h4>Informações do Veículo</h4>
+                        <div class="detail-item">
+                            <span class="detail-label">Placa:</span>
+                            <span class="detail-value" id="detail-placa">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Modelo:</span>
+                            <span class="detail-value" id="detail-modelo">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Ano:</span>
+                            <span class="detail-value" id="detail-ano">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Capacidade:</span>
+                            <span class="detail-value" id="detail-capacidade">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Tipo:</span>
+                            <span class="detail-value" id="detail-tipo">-</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Informações da Operação -->
+                    <div class="detail-card">
+                        <h4>Informações da Operação</h4>
+                        <div class="detail-item">
+                            <span class="detail-label">Motorista:</span>
+                            <span class="detail-value" id="detail-motorista">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Rota:</span>
+                            <span class="detail-value" id="detail-rota">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Status:</span>
+                            <span class="detail-value" id="detail-status">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Temperatura:</span>
+                            <span class="detail-value" id="detail-temperatura">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Última Atualização:</span>
+                            <span class="detail-value" id="detail-atualizacao">-</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Manutenção -->
+                    <div class="detail-card">
+                        <h4>Manutenção</h4>
+                        <div class="detail-item">
+                            <span class="detail-label">Última Manutenção:</span>
+                            <span class="detail-value" id="detail-ultima-manutencao">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Próxima Manutenção:</span>
+                            <span class="detail-value" id="detail-proxima-manutencao">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Quilometragem:</span>
+                            <span class="detail-value" id="detail-km">-</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Contato -->
+                    <div class="detail-card">
+                        <h4>Contato do Motorista</h4>
+                        <div class="detail-item">
+                            <span class="detail-label">Telefone:</span>
+                            <span class="detail-value" id="detail-telefone">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">E-mail:</span>
+                            <span class="detail-value" id="detail-email">-</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Gráfico de Temperatura -->
+                    <div class="temperature-chart">
+                        <h4>Variação de Temperatura (Últimas 24h)</h4>
+                        <div class="chart-container">
+                            <canvas id="vehicleDetailChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="editVehicleBtn">
+                    <i class="fas fa-pencil-alt"></i> Editar Veículo
+                </button>
+                <button class="btn btn-primary">
+                    <i class="fas fa-print"></i> Imprimir Relatório
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="./scripts/veiculos.js"></script>
+</body>
+</html>
