@@ -182,6 +182,9 @@ const sensorData = {
     }
 };
 
+// Variável global para o gráfico
+let temperatureChart = null;
+
 // Função para obter parâmetros da URL
 function getUrlParameter(name) {
     name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
@@ -257,14 +260,7 @@ function loadVehicleData() {
     }
     
     // Atualizar status das portas
-    const doorsChangeElement = document.getElementById('doors-change');
-    if (vehicle.doorsStatus === '0/1 Abertas') {
-        doorsChangeElement.innerHTML = '<i class="fas fa-check-circle"></i> Status normal';
-        doorsChangeElement.className = 'dashboard-change positive';
-    } else {
-        doorsChangeElement.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Alerta: Porta aberta há 0 minutos';
-        doorsChangeElement.className = 'dashboard-change negative';
-    }
+    updateDoorsStatus(vehicle.doorsStatus === '1/1 Abertas');
     
     // Atualizar status do refrigerador
     const refrigeratorChangeElement = document.getElementById('refrigerator-change');
@@ -284,6 +280,12 @@ function loadVehicleData() {
     
     // Criar cards de sensores dinamicamente
     createSensorCards();
+    
+    // Atualizar temperaturas nos sensores visuais
+    updateSensorTemperatures();
+    
+    // Criar gráfico de temperatura
+    createTemperatureChart(vehicle);
 }
 
 // Função para obter texto do status
@@ -334,6 +336,21 @@ function updateSensorVisuals(temperature) {
             }
         } else {
             sensor.classList.add('sensor-alert');
+        }
+    });
+}
+
+// Função para atualizar temperaturas nos sensores visuais
+function updateSensorTemperatures() {
+    Object.keys(sensorData).forEach(sensorId => {
+        const sensor = sensorData[sensorId];
+        const sensorElement = document.querySelector(`.sensor[data-sensor="${sensorId}"]`);
+        
+        if (sensorElement) {
+            const temperatureElement = sensorElement.querySelector('.sensor-temperature');
+            if (temperatureElement) {
+                temperatureElement.textContent = sensor.value;
+            }
         }
     });
 }
@@ -415,6 +432,208 @@ function updateSensorDetails(sensorId) {
     }
 }
 
+// Função para atualizar o status das portas
+function updateDoorsStatus(isOpen) {
+    const truckClosed = document.getElementById('truck-closed');
+    const truckOpen = document.getElementById('truck-open');
+    
+    if (isOpen) {
+        // Abrir porta
+        truckClosed.style.opacity = '0';
+        truckOpen.style.opacity = '1';
+        
+        // Atualizar dashboard
+        document.getElementById('doors-status').textContent = '1/1 Abertas';
+        document.getElementById('doors-label').textContent = 'Porta traseira aberta';
+        document.getElementById('doors-change').innerHTML = 
+            '<i class="fas fa-exclamation-triangle"></i> Alerta: Porta aberta há 0 minutos';
+        document.getElementById('doors-change').className = 'dashboard-change negative';
+    } else {
+        // Fechar porta
+        truckClosed.style.opacity = '1';
+        truckOpen.style.opacity = '0';
+        
+        // Atualizar dashboard
+        document.getElementById('doors-status').textContent = '0/1 Abertas';
+        document.getElementById('doors-label').textContent = 'Porta traseira fechada';
+        document.getElementById('doors-change').innerHTML = 
+            '<i class="fas fa-check-circle"></i> Status normal';
+        document.getElementById('doors-change').className = 'dashboard-change positive';
+    }
+}
+
+// Função para alternar status da porta
+function toggleDoorStatus() {
+    const truckClosed = document.getElementById('truck-closed');
+    const isCurrentlyOpen = truckClosed.style.opacity === '0';
+    
+    // Alternar o status
+    updateDoorsStatus(!isCurrentlyOpen);
+}
+
+// Função para criar gráfico de temperatura
+function createTemperatureChart(vehicle) {
+    const ctx = document.getElementById('temperatureChart');
+    if (!ctx) {
+        console.error('Canvas temperatureChart não encontrado');
+        return;
+    }
+    
+    // Destruir gráfico anterior se existir
+    if (temperatureChart) {
+        temperatureChart.destroy();
+    }
+    
+    // Gerar dados de histórico para as últimas 24h
+    const historyData = generateTemperatureHistory(vehicle);
+    
+    const ctx2d = ctx.getContext('2d');
+    
+    // Criar gradiente para o gráfico
+    const gradient = ctx2d.createLinearGradient(0, 0, 0, 300);
+    gradient.addColorStop(0, 'rgba(46, 167, 173, 0.3)');
+    gradient.addColorStop(1, 'rgba(46, 167, 173, 0.05)');
+    
+    temperatureChart = new Chart(ctx2d, {
+        type: 'line',
+        data: {
+            labels: historyData.times,
+            datasets: [{
+                label: 'Temperatura (°C)',
+                data: historyData.temperatures,
+                backgroundColor: gradient,
+                borderColor: 'rgba(46, 167, 173, 1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: 'rgba(46, 167, 173, 1)',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 3,
+                pointHoverRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleFont: {
+                        size: 12
+                    },
+                    bodyFont: {
+                        size: 12
+                    },
+                    callbacks: {
+                        label: function(context) {
+                            return `Temperatura: ${context.parsed.y}°C`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    },
+                    ticks: {
+                        maxRotation: 45,
+                        callback: function(value, index, values) {
+                            // Mostrar apenas alguns labels para não poluir
+                            return index % 4 === 0 ? this.getLabelForValue(value) : '';
+                        }
+                    }
+                },
+                y: {
+                    beginAtZero: false,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Temperatura (°C)'
+                    },
+                    min: -2,
+                    max: 12,
+                    ticks: {
+                        stepSize: 2
+                    }
+                }
+            },
+            interaction: {
+                mode: 'nearest',
+                axis: 'x',
+                intersect: false
+            },
+            elements: {
+                line: {
+                    tension: 0.4
+                }
+            }
+        }
+    });
+    
+    // Adicionar anotações de zonas de temperatura (simulação visual)
+    addTemperatureZonesToChart(vehicle);
+}
+
+// Função para gerar histórico de temperatura (simulação)
+function generateTemperatureHistory(vehicle) {
+    const times = [];
+    const temperatures = [];
+    
+    // Gerar 24 pontos de dados (uma por hora)
+    const baseTemp = parseFloat(vehicle.temperatura);
+    
+    for (let i = 23; i >= 0; i--) {
+        const time = new Date();
+        time.setHours(time.getHours() - i);
+        
+        // Formatar hora
+        const timeString = time.toLocaleTimeString('pt-BR', { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+        });
+        
+        // Gerar temperatura com variação realista baseada no status
+        let variationRange = 1.5; // Variação padrão
+        if (vehicle.status === 'alert') variationRange = 3; // Mais variação para crítico
+        if (vehicle.status === 'warning') variationRange = 2; // Variação média para atenção
+        
+        const variation = (Math.random() - 0.5) * variationRange;
+        const temp = Math.max(-2, Math.min(12, baseTemp + variation));
+        
+        times.push(timeString);
+        temperatures.push(parseFloat(temp.toFixed(1)));
+    }
+    
+    return { times, temperatures };
+}
+
+// Função para adicionar zonas de temperatura ao gráfico (simulação visual)
+function addTemperatureZonesToChart(vehicle) {
+    // Esta função simula visualmente as zonas de temperatura
+    // Em uma implementação real, você usaria anotações do Chart.js
+    console.log('Zonas de temperatura para o veículo:', vehicle.placa);
+}
+
+// Função para atualizar o gráfico quando os dados mudarem
+function updateTemperatureChart(vehicle) {
+    if (temperatureChart && vehicle) {
+        const historyData = generateTemperatureHistory(vehicle);
+        
+        temperatureChart.data.labels = historyData.times;
+        temperatureChart.data.datasets[0].data = historyData.temperatures;
+        temperatureChart.update('none'); // 'none' para animação suave
+    }
+}
+
 // Adicionar eventos de clique aos sensores
 function setupEventListeners() {
     const sensors = document.querySelectorAll('.sensor');
@@ -433,6 +652,12 @@ function setupEventListeners() {
             updateSensorDetails(sensorId);
         });
     });
+    
+    // Adicionar evento de clique para o card das portas
+    const doorsCard = document.getElementById('doors-card');
+    if (doorsCard) {
+        doorsCard.addEventListener('click', toggleDoorStatus);
+    }
     
     // Selecionar o primeiro sensor por padrão
     updateSensorDetails('principal');
@@ -468,6 +693,25 @@ function updateSensorData() {
             sensor.status = 'Crítico';
         }
         
+        // Atualizar temperatura no sensor visual
+        const sensorElement = document.querySelector(`.sensor[data-sensor="${sensorId}"]`);
+        if (sensorElement) {
+            const temperatureElement = sensorElement.querySelector('.sensor-temperature');
+            if (temperatureElement) {
+                temperatureElement.textContent = `${newTemp}°C`;
+            }
+            
+            // Atualizar classe do sensor baseado na temperatura
+            sensorElement.className = 'sensor';
+            if (sensor.status === 'Normal') {
+                sensorElement.classList.add('sensor-normal');
+            } else if (sensor.status === 'Alerta') {
+                sensorElement.classList.add('sensor-warning');
+            } else {
+                sensorElement.classList.add('sensor-alert');
+            }
+        }
+        
         // Atualizar elementos visuais se este sensor estiver selecionado
         const selectedSensor = document.querySelector('.sensor.active');
         if (selectedSensor && selectedSensor.getAttribute('data-sensor') === sensorId) {
@@ -484,51 +728,30 @@ function updateSensorData() {
             statusBadge.className = 'status-badge';
             statusBadge.classList.add(getSensorStatusClass(sensor.status));
         }
-        
-        // Atualizar sensores visuais
-        const visualSensor = document.querySelector(`.sensor[data-sensor="${sensorId}"]`);
-        if (visualSensor) {
-            visualSensor.className = 'sensor';
-            if (sensor.status === 'Normal') {
-                visualSensor.classList.add('sensor-normal');
-            } else if (sensor.status === 'Alerta') {
-                visualSensor.classList.add('sensor-warning');
-            } else {
-                visualSensor.classList.add('sensor-alert');
-            }
-        }
     });
+    
+    // Atualizar gráfico de temperatura
+    const plate = getUrlParameter('placa');
+    if (plate && vehicleData[plate]) {
+        updateTemperatureChart(vehicleData[plate]);
+    }
     
     // Atualizar a cada 10 segundos
     setTimeout(updateSensorData, 10000);
 }
 
-// Alternar status da porta
-function toggleDoorStatus() {
-    const door = document.getElementById('traseira');
-    if (door.classList.contains('door-open')) {
-        door.classList.remove('door-open');
-        door.innerHTML = '<i class="fas fa-door-closed"></i>';
-        
-        // Atualizar dashboard
-        document.getElementById('doors-status').textContent = '0/1 Abertas';
-        document.getElementById('doors-change').innerHTML = 
-            '<i class="fas fa-check-circle"></i> Status normal';
-        document.getElementById('doors-change').className = 'dashboard-change positive';
-    } else {
-        door.classList.add('door-open');
-        door.innerHTML = '<i class="fas fa-door-open"></i>';
-        
-        // Atualizar dashboard
-        document.getElementById('doors-status').textContent = '1/1 Abertas';
-        document.getElementById('doors-change').innerHTML = 
-            '<i class="fas fa-exclamation-triangle"></i> Alerta: Porta aberta há 0 minutos';
-        document.getElementById('doors-change').className = 'dashboard-change negative';
-    }
-}
-
 // Inicialização da aplicação
 document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar imagens do caminhão
+    const truckClosed = document.getElementById('truck-closed');
+    const truckOpen = document.getElementById('truck-open');
+    
+    // Garantir que as imagens estejam posicionadas corretamente
+    if (truckClosed && truckOpen) {
+        truckClosed.style.opacity = '1';
+        truckOpen.style.opacity = '0';
+    }
+    
     // Carregar dados do veículo
     loadVehicleData();
     
@@ -536,9 +759,6 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
         setupEventListeners();
     }, 100);
-    
-    // Adicionar evento de clique para a porta
-    document.getElementById('traseira').addEventListener('click', toggleDoorStatus);
     
     // Iniciar simulação de atualização de dados
     updateSensorData();
