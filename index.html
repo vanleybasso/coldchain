@@ -8,9 +8,170 @@
     <link rel="stylesheet" href="./styles/index.css">
     <!-- Adicionar Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Estilos da tela de login */
+        .login-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        .login-container.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .login-box {
+            background: var(--white);
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .login-logo {
+            margin-bottom: 30px;
+        }
+
+        .login-logo img {
+            max-width: 50px;
+            height: auto;
+        }
+
+        .login-title {
+            color: var(--primary);
+            margin-bottom: 25px;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            text-align: left;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            padding-right: 45px;
+        }
+
+        .form-control:focus {
+            border-color: var(--secondary);
+            outline: none;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 38px;
+            background: none;
+            border: none;
+            color: #777;
+            cursor: pointer;
+            font-size: 16px;
+            transition: color 0.3s;
+        }
+
+        .password-toggle:hover {
+            color: var(--secondary);
+        }
+
+        .login-btn {
+            background-color: var(--primary);
+            color: var(--white);
+            border: none;
+            border-radius: 5px;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+
+        .login-btn:hover {
+            background-color: #152547;
+        }
+
+        .login-error {
+            color: var(--accent2);
+            margin-top: 10px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .login-error.show {
+            display: block;
+        }
+
+        .login-footer {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #777;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
+    <!-- Tela de Login -->
+    <div class="login-container" id="loginContainer">
+        <div class="login-box">
+            <div class="login-logo">
+                <img src="/rotasystem.png" alt="RotaSystem Logo">
+            </div>
+            <h2 class="login-title">Acesso ao Sistema</h2>
+            <form class="login-form" id="loginForm">
+                <div class="form-group">
+                    <label for="username">Usuário</label>
+                    <input type="text" id="username" class="form-control" placeholder="Digite seu usuário" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Senha</label>
+                    <input type="password" id="password" class="form-control" placeholder="Digite sua senha" required>
+                    <button type="button" class="password-toggle" id="passwordToggle">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                <div class="login-error" id="loginError">
+                    Usuário ou senha incorretos. Tente novamente.
+                </div>
+                <button type="submit" class="login-btn">Entrar</button>
+            </form>
+            <div class="login-footer">
+                Sistema de Telemetria de Frios
+            </div>
+        </div>
+    </div>
+
+    <!-- Conteúdo principal (inicialmente oculto) -->
+    <div class="container" id="mainContainer" style="display: none;">
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="logo">
@@ -23,7 +184,7 @@
                 <li><a href="rotas.html"><i class="fas fa-route"></i> Rotas</a></li>
                 <li><a href="temperaturas.html"><i class="fas fa-thermometer-half"></i> Temperaturas</a></li>
                 <li><a href="alertas.html"><i class="fas fa-exclamation-triangle"></i> Alertas</a></li>
-                <li><a href="#"><i class="fas fa-sign-out-alt"></i> Sair</a></li>
+                <li><a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Sair</a></li>
             </ul>
             
             <!-- Nova logo adicionada no final do sidebar -->
@@ -232,6 +393,82 @@
         </div>
     </div>
 
+    <script>
+        // Sistema de Login
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginContainer = document.getElementById('loginContainer');
+            const mainContainer = document.getElementById('mainContainer');
+            const loginForm = document.getElementById('loginForm');
+            const loginError = document.getElementById('loginError');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const passwordToggle = document.getElementById('passwordToggle');
+            const passwordInput = document.getElementById('password');
+            
+            // Verificar se o usuário já está logado
+            if (localStorage.getItem('loggedIn') === 'true') {
+                loginContainer.classList.add('hidden');
+                mainContainer.style.display = 'grid';
+            }
+            
+            // Alternar visibilidade da senha
+            passwordToggle.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                
+                // Alterar ícone
+                if (type === 'text') {
+                    passwordToggle.innerHTML = '<i class="fas fa-eye-slash"></i>';
+                } else {
+                    passwordToggle.innerHTML = '<i class="fas fa-eye"></i>';
+                }
+            });
+            
+            // Processar o formulário de login
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                
+                // Verificar credenciais
+                if (username === 'rotasystem' && password === '123456') {
+                    // Login bem-sucedido
+                    loginError.classList.remove('show');
+                    localStorage.setItem('loggedIn', 'true');
+                    
+                    // Fazer transição para o dashboard
+                    loginContainer.classList.add('hidden');
+                    setTimeout(() => {
+                        loginContainer.style.display = 'none';
+                        mainContainer.style.display = 'grid';
+                    }, 500);
+                } else {
+                    // Login falhou
+                    loginError.classList.add('show');
+                }
+            });
+            
+            // Logout
+            logoutBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                localStorage.removeItem('loggedIn');
+                mainContainer.style.display = 'none';
+                loginContainer.style.display = 'flex';
+                setTimeout(() => {
+                    loginContainer.classList.remove('hidden');
+                }, 10);
+                
+                // Limpar formulário
+                document.getElementById('username').value = '';
+                document.getElementById('password').value = '';
+                loginError.classList.remove('show');
+                
+                // Resetar ícone do olho
+                passwordInput.setAttribute('type', 'password');
+                passwordToggle.innerHTML = '<i class="fas fa-eye"></i>';
+            });
+        });
+    </script>
     <script src="./scripts/index.js"></script>
 </body>
 </html>
