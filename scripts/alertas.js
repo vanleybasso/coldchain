@@ -73,20 +73,20 @@ async function loadAlertsData() {
     }
 }
 
-// Gerar alertas baseados nos dados dos sensores
+// Gerar alertas baseados nos dados dos sensores - ATUALIZADA
 function generateAlertsFromSensorData(sensorData) {
     const alerts = [];
     const now = new Date();
     
-    // Mapeamento de sensores para nomes amigáveis
+    // NOVO MAPEAMENTO DE SENSORES PARA NOMES AMIGÁVEIS
     const sensorNames = {
-        'externo': 'Sensor Externo',
-        'principal': 'Sensor Principal',
-        'meio': 'Sensor do Meio',
-        'porta': 'Sensor da Porta',
-        'fundo': 'Sensor do Fundo',
-        'piso': 'Sensor do Piso',
-        'teto': 'Sensor do Teto'
+        'externo': 'Externo',
+        'dianteiro-direito': 'Dianteiro Direito',
+        'dianteiro-esquerdo': 'Dianteiro Esquerdo',
+        'central-direito': 'Central Direito',
+        'central-esquerdo': 'Central Esquerdo',
+        'fundo-direito': 'Fundo Direito',
+        'fundo-esquerdo': 'Fundo Esquerdo'
     };
     
     // Verificar cada sensor
@@ -213,7 +213,7 @@ function getSystemAlerts() {
     ];
 }
 
-// Dados de fallback para alertas
+// Dados de fallback para alertas - ATUALIZADA
 function getFallbackAlerts() {
     const now = new Date();
     const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
@@ -223,8 +223,8 @@ function getFallbackAlerts() {
         {
             id: generateAlertId(),
             vehicle: 'KG8000003',
-            sensor: 'Sensor da Porta',
-            sensorId: 'porta',
+            sensor: 'Dianteiro Direito',
+            sensorId: 'dianteiro-direito',
             severity: 'critical',
             temperature: 6.8,
             description: 'Temperatura crítica na carga',
@@ -235,6 +235,24 @@ function getFallbackAlerts() {
                     action: 'Alerta criado',
                     user: 'Sistema',
                     timestamp: now.toISOString()
+                }
+            ]
+        },
+        {
+            id: generateAlertId(),
+            vehicle: 'KG8000003',
+            sensor: 'Central Esquerdo',
+            sensorId: 'central-esquerdo',
+            severity: 'warning',
+            temperature: 5.8,
+            description: 'Temperatura acima do ideal',
+            timestamp: oneHourAgo.toISOString(),
+            status: 'active',
+            history: [
+                {
+                    action: 'Alerta criado',
+                    user: 'Sistema',
+                    timestamp: oneHourAgo.toISOString()
                 }
             ]
         },

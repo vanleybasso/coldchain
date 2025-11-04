@@ -166,15 +166,15 @@ function updateMetrics() {
     updateTrendIndicators();
 }
 
-// Calcular métricas de temperatura baseadas no HISTÓRICO
+// Calcular métricas de temperatura baseadas no HISTÓRICO - ATUALIZADA
 function calculateTemperatureMetricsFromHistory() {
     let allTemperatures = [];
     let sensorMinTemperatures = {}; // Para calcular mínima média
     
     // Coletar temperaturas do histórico baseadas nos filtros
     if (currentFilters.sensor === 'all') {
-        // Todos os sensores internos
-        const internalSensors = ['principal', 'meio', 'porta', 'fundo', 'piso', 'teto'];
+        // NOVOS NOMES DOS SENSORES INTERNOS
+        const internalSensors = ['dianteiro-direito', 'dianteiro-esquerdo', 'central-direito', 'central-esquerdo', 'fundo-direito', 'fundo-esquerdo'];
         
         internalSensors.forEach(sensorName => {
             if (sensorHistoryData[sensorName] && sensorHistoryData[sensorName].length > 0) {
@@ -297,12 +297,13 @@ function updateTrendElement(elementId, trend) {
     }
 }
 
-// Obter dados históricos para cálculo de tendências
+// Obter dados históricos para cálculo de tendências - ATUALIZADA
 function getHistoricalDataForMetrics() {
     let allTemperatures = [];
     
     if (currentFilters.sensor === 'all') {
-        const internalSensors = ['principal', 'meio', 'porta', 'fundo', 'piso', 'teto'];
+        // NOVOS NOMES DOS SENSORES INTERNOS
+        const internalSensors = ['dianteiro-direito', 'dianteiro-esquerdo', 'central-direito', 'central-esquerdo', 'fundo-direito', 'fundo-esquerdo'];
         internalSensors.forEach(sensorName => {
             if (sensorHistoryData[sensorName]) {
                 sensorHistoryData[sensorName].forEach(entry => {
@@ -449,20 +450,21 @@ function getRealChartData() {
     }
 }
 
-// Dados do gráfico para todos os sensores
+// Dados do gráfico para todos os sensores - ATUALIZADA
 function getAllSensorsChartData() {
-    const internalSensors = ['principal', 'meio', 'porta', 'fundo', 'piso', 'teto'];
+    // NOVOS NOMES DOS SENSORES INTERNOS
+    const internalSensors = ['dianteiro-direito', 'dianteiro-esquerdo', 'central-direito', 'central-esquerdo', 'fundo-direito', 'fundo-esquerdo'];
     const datasets = [];
     const timeLabels = [];
     
     // Cores para os sensores
     const sensorColors = {
-        'principal': '#2EA7AD',
-        'meio': '#45B7D1',
-        'porta': '#FFA07A',
-        'fundo': '#98D8C8',
-        'piso': '#F7DC6F',
-        'teto': '#BB8FCE'
+        'dianteiro-direito': '#2EA7AD',
+        'dianteiro-esquerdo': '#45B7D1',
+        'central-direito': '#FFA07A',
+        'central-esquerdo': '#98D8C8',
+        'fundo-direito': '#F7DC6F',
+        'fundo-esquerdo': '#BB8FCE'
     };
     
     // Obter labels de tempo do primeiro sensor que tenha dados
@@ -591,7 +593,7 @@ function getFallbackChartData() {
     };
 }
 
-// Gráfico de distribuição por sensor
+// Gráfico de distribuição por sensor - ATUALIZADA
 function createDistributionChart() {
     const ctx = document.getElementById('sensorDistributionChart');
     if (!ctx) return;
@@ -635,9 +637,10 @@ function createDistributionChart() {
     });
 }
 
-// Obter temperaturas atuais dos sensores
+// Obter temperaturas atuais dos sensores - ATUALIZADA
 function getCurrentSensorTemperatures() {
-    const sensors = ['principal', 'meio', 'porta', 'fundo', 'piso', 'teto', 'externo'];
+    // NOVOS NOMES DOS SENSORES
+    const sensors = ['dianteiro-direito', 'dianteiro-esquerdo', 'central-direito', 'central-esquerdo', 'fundo-direito', 'fundo-esquerdo', 'externo'];
     const labels = [];
     const temperatures = [];
     const colors = [];
@@ -681,16 +684,16 @@ function getCurrentSensorTemperatures() {
     return { labels, temperatures, colors, borderColors };
 }
 
-// Funções auxiliares
+// Função para obter nome de exibição do sensor - ATUALIZADA
 function getSensorDisplayName(sensorName) {
     const names = {
-        'externo': 'Sensor Externo',
-        'principal': 'Sensor Principal',
-        'meio': 'Sensor do Meio',
-        'porta': 'Sensor da Porta',
-        'fundo': 'Sensor do Fundo',
-        'piso': 'Sensor do Piso',
-        'teto': 'Sensor do Teto'
+        'externo': 'Externo',
+        'dianteiro-direito': 'Dianteiro Direito',
+        'dianteiro-esquerdo': 'Dianteiro Esquerdo',
+        'central-direito': 'Central Direito',
+        'central-esquerdo': 'Central Esquerdo',
+        'fundo-direito': 'Fundo Direito',
+        'fundo-esquerdo': 'Fundo Esquerdo'
     };
     return names[sensorName] || sensorName;
 }

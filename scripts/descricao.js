@@ -5,29 +5,29 @@ let sensorHistoryData = {};
 let currentSensorChart = null;
 let currentHumidityChart = null;
 let isDoorOpen = false;
-let visibleTemperatureSensors = new Set(['externo', 'principal', 'meio', 'porta', 'fundo', 'piso', 'teto']);
-let visibleHumiditySensors = new Set(['externo', 'principal', 'meio', 'porta', 'fundo', 'piso', 'teto']);
+let visibleTemperatureSensors = new Set(['externo', 'dianteiro-direito', 'dianteiro-esquerdo', 'central-direito', 'central-esquerdo', 'fundo-direito', 'fundo-esquerdo']);
+let visibleHumiditySensors = new Set(['externo', 'dianteiro-direito', 'dianteiro-esquerdo', 'central-direito', 'central-esquerdo', 'fundo-direito', 'fundo-esquerdo']);
 let selectedSensor = null;
 
 // Cores para os gráficos
 const sensorColors = {
     'externo': '#FF6B6B',
-    'principal': '#4ECDC4', 
-    'meio': '#45B7D1',
-    'porta': '#FFA07A',
-    'fundo': '#98D8C8',
-    'piso': '#F7DC6F',
-    'teto': '#BB8FCE'
+    'dianteiro-direito': '#4ECDC4', 
+    'dianteiro-esquerdo': '#45B7D1',
+    'central-direito': '#FFA07A',
+    'central-esquerdo': '#98D8C8',
+    'fundo-direito': '#F7DC6F',
+    'fundo-esquerdo': '#BB8FCE'
 };
 
 const humidityColors = {
     'externo': '#E74C3C',
-    'principal': '#3498DB',
-    'meio': '#2ECC71',
-    'porta': '#F39C12',
-    'fundo': '#9B59B6',
-    'piso': '#1ABC9C',
-    'teto': '#D35400'
+    'dianteiro-direito': '#3498DB',
+    'dianteiro-esquerdo': '#2ECC71',
+    'central-direito': '#F39C12',
+    'central-esquerdo': '#9B59B6',
+    'fundo-direito': '#1ABC9C',
+    'fundo-esquerdo': '#D35400'
 };
 
 // Sistema de Loading
@@ -85,7 +85,7 @@ async function loadSensorData() {
         
         // Processar os dados para o formato esperado
         const processedData = {};
-        const sensorNames = ['externo', 'principal', 'meio', 'porta', 'fundo', 'piso', 'teto'];
+        const sensorNames = ['externo', 'dianteiro-direito', 'dianteiro-esquerdo', 'central-direito', 'central-esquerdo', 'fundo-direito', 'fundo-esquerdo'];
         
         sensorNames.forEach(sensorName => {
             if (rawData[sensorName] && rawData[sensorName].temperature !== 0.0) {
@@ -203,26 +203,26 @@ function formatTimeForChart(dateTimeString) {
 // Funções auxiliares (mantidas as mesmas)
 function getSensorDisplayName(sensorName) {
     const names = {
-        'externo': 'Sensor Externo',
-        'principal': 'Sensor Principal',
-        'meio': 'Sensor do Meio',
-        'porta': 'Sensor da Porta',
-        'fundo': 'Sensor do Fundo',
-        'piso': 'Sensor do Piso',
-        'teto': 'Sensor do Teto'
+        'externo': 'Externo',
+        'dianteiro-direito': 'Dianteiro Direito',
+        'dianteiro-esquerdo': 'Dianteiro Esquerdo',
+        'central-direito': 'Central Direito',
+        'central-esquerdo': 'Central Esquerdo',
+        'fundo-direito': 'Fundo Direito',
+        'fundo-esquerdo': 'Fundo Esquerdo'
     };
     return names[sensorName] || sensorName;
 }
 
 function getSensorLocation(sensorName) {
     const locations = {
-        'externo': 'Externo',
-        'principal': 'Centro da carga',
-        'meio': 'Meio da carga',
-        'porta': 'Perto da porta',
-        'fundo': 'Fundo do veículo',
-        'piso': 'Piso dianteiro',
-        'teto': 'Teto traseiro'
+        'externo': 'Externo do veículo',
+        'dianteiro-direito': 'Parte dianteira direita',
+        'dianteiro-esquerdo': 'Parte dianteira esquerda',
+        'central-direito': 'Centro direito da carga',
+        'central-esquerdo': 'Centro esquerdo da carga',
+        'fundo-direito': 'Fundo direito',
+        'fundo-esquerdo': 'Fundo esquerdo'
     };
     return locations[sensorName] || 'Localização desconhecida';
 }
@@ -272,9 +272,9 @@ function getZeroSensorData() {
     
     return {
         'externo': {
-            name: 'Sensor Externo',
+            name: 'Externo',
             value: 'Não Config.',
-            location: 'Externo',
+            location: 'Externo do veículo',
             status: 'Não Configurado',
             lastRead: now,
             icon: 'fas fa-sun',
@@ -283,10 +283,10 @@ function getZeroSensorData() {
             rawHumidity: 0.0,
             humidityStatus: 'Não Configurado'
         },
-        'principal': {
-            name: 'Sensor Principal',
+        'dianteiro-direito': {
+            name: 'Dianteiro Direito',
             value: 'Não Config.',
-            location: 'Centro da carga',
+            location: 'Parte dianteira direita',
             status: 'Não Configurado',
             lastRead: now,
             icon: 'fas fa-thermometer-half',
@@ -295,10 +295,10 @@ function getZeroSensorData() {
             rawHumidity: 0.0,
             humidityStatus: 'Não Configurado'
         },
-        'meio': {
-            name: 'Sensor do Meio',
+        'dianteiro-esquerdo': {
+            name: 'Dianteiro Esquerdo',
             value: 'Não Config.',
-            location: 'Meio da carga',
+            location: 'Parte dianteira esquerda',
             status: 'Não Configurado',
             lastRead: now,
             icon: 'fas fa-thermometer-half',
@@ -307,10 +307,10 @@ function getZeroSensorData() {
             rawHumidity: 0.0,
             humidityStatus: 'Não Configurado'
         },
-        'porta': {
-            name: 'Sensor da Porta',
+        'central-direito': {
+            name: 'Central Direito',
             value: 'Não Config.',
-            location: 'Perto da porta',
+            location: 'Centro direito da carga',
             status: 'Não Configurado',
             lastRead: now,
             icon: 'fas fa-thermometer-half',
@@ -319,10 +319,10 @@ function getZeroSensorData() {
             rawHumidity: 0.0,
             humidityStatus: 'Não Configurado'
         },
-        'fundo': {
-            name: 'Sensor do Fundo',
+        'central-esquerdo': {
+            name: 'Central Esquerdo',
             value: 'Não Config.',
-            location: 'Fundo do veículo',
+            location: 'Centro esquerdo da carga',
             status: 'Não Configurado',
             lastRead: now,
             icon: 'fas fa-thermometer-half',
@@ -331,10 +331,10 @@ function getZeroSensorData() {
             rawHumidity: 0.0,
             humidityStatus: 'Não Configurado'
         },
-        'piso': {
-            name: 'Sensor do Piso',
+        'fundo-direito': {
+            name: 'Fundo Direito',
             value: 'Não Config.',
-            location: 'Piso dianteiro',
+            location: 'Fundo direito',
             status: 'Não Configurado',
             lastRead: now,
             icon: 'fas fa-thermometer-half',
@@ -343,10 +343,10 @@ function getZeroSensorData() {
             rawHumidity: 0.0,
             humidityStatus: 'Não Configurado'
         },
-        'teto': {
-            name: 'Sensor do Teto',
+        'fundo-esquerdo': {
+            name: 'Fundo Esquerdo',
             value: 'Não Config.',
-            location: 'Teto traseiro',
+            location: 'Fundo esquerdo',
             status: 'Não Configurado',
             lastRead: now,
             icon: 'fas fa-thermometer-half',
@@ -362,7 +362,7 @@ function generateMockHistory(hours = 12) {
     console.log(`Gerando dados mock para histórico de ${hours}h...`);
     
     const mockHistory = {};
-    const sensorNames = ['externo', 'principal', 'meio', 'porta', 'fundo', 'piso', 'teto'];
+    const sensorNames = ['externo', 'dianteiro-direito', 'dianteiro-esquerdo', 'central-direito', 'central-esquerdo', 'fundo-direito', 'fundo-esquerdo'];
     
     sensorNames.forEach(sensorName => {
         const history = [];
@@ -378,7 +378,7 @@ function generateMockHistory(hours = 12) {
             if (sensorName === 'externo') {
                 tempVariation = Math.sin(i * Math.PI / 6) * 6 + (Math.random() - 0.5) * 2;
                 humidityVariation = Math.sin(i * Math.PI / 6) * 15 + (Math.random() - 0.5) * 5;
-            } else if (sensorName === 'porta') {
+            } else if (sensorName === 'central-direito') {
                 tempVariation = (Math.random() - 0.5) * 2.5;
                 humidityVariation = (Math.random() - 0.5) * 8;
             } else {
@@ -410,7 +410,7 @@ function getUrlParameter(name) {
     return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
 }
 
-// Nova função para atualizar o dashboard com dados reais dos sensores
+// NOVA FUNÇÃO: Atualizar o dashboard com dados reais dos sensores (SEM COMBUSTÍVEL)
 function updateDashboardWithSensorData() {
     console.log('Atualizando dashboard com dados dos sensores...');
     
@@ -426,8 +426,7 @@ function updateDashboardWithSensorData() {
     
     updateRefrigeratorStatus(avgTemperature);
     
-    document.getElementById('fuel-consumption').textContent = '-- L/100km';
-    
+    // REMOVIDO: Atualização do consumo de combustível
     console.log('Dashboard atualizado com dados reais dos sensores');
 }
 
@@ -436,9 +435,13 @@ function checkDoorStatus() {
         return true;
     }
     
-    const doorSensor = sensorData['porta'];
-    if (doorSensor && doorSensor.temperatureValue > 7 && doorSensor.temperatureValue !== 0.0) {
-        return true;
+    // Verificar se algum sensor próximo à porta está com temperatura elevada
+    const doorSensors = ['central-direito', 'central-esquerdo'];
+    for (const sensorName of doorSensors) {
+        const sensor = sensorData[sensorName];
+        if (sensor && sensor.temperatureValue > 7 && sensor.temperatureValue !== 0.0) {
+            return true;
+        }
     }
     return false;
 }
@@ -517,7 +520,7 @@ async function loadVehicleData() {
     
     // Chamar updateSensorDetails sem afetar os gráficos
     if (Object.keys(sensorData).length > 0) {
-        updateSensorDetailsWithoutAffectingCharts('principal');
+        updateSensorDetailsWithoutAffectingCharts('dianteiro-direito');
     }
     
     currentVehicleData = { plate, avgTemperature };
@@ -525,7 +528,7 @@ async function loadVehicleData() {
 }
 
 function calculateAverageTemperature() {
-    const internalSensors = ['principal', 'meio', 'porta', 'fundo', 'piso', 'teto'];
+    const internalSensors = ['dianteiro-direito', 'dianteiro-esquerdo', 'central-direito', 'central-esquerdo', 'fundo-direito', 'fundo-esquerdo'];
     let totalTemp = 0;
     let validSensors = 0;
     
@@ -750,7 +753,7 @@ function updateSensorDetailsWithoutAffectingCharts(sensorId) {
 // NOVA FUNÇÃO: Atualizar gráficos para mostrar apenas o sensor selecionado
 function updateChartsForSelectedSensor(sensorId) {
     // Para temperatura
-    const sensorNames = ['externo', 'principal', 'meio', 'porta', 'fundo', 'piso', 'teto'];
+    const sensorNames = ['externo', 'dianteiro-direito', 'dianteiro-esquerdo', 'central-direito', 'central-esquerdo', 'fundo-direito', 'fundo-esquerdo'];
     sensorNames.forEach(name => {
         if (name === sensorId) {
             visibleTemperatureSensors.add(name);
@@ -903,7 +906,7 @@ function createComparativeCharts() {
 
 // NOVA FUNÇÃO: Mostrar todos os sensores no carregamento inicial
 function showAllSensorsOnLoad() {
-    const sensorNames = ['externo', 'principal', 'meio', 'porta', 'fundo', 'piso', 'teto'];
+    const sensorNames = ['externo', 'dianteiro-direito', 'dianteiro-esquerdo', 'central-direito', 'central-esquerdo', 'fundo-direito', 'fundo-esquerdo'];
     
     // Limpar os conjuntos e adicionar todos os sensores
     visibleTemperatureSensors.clear();
@@ -990,7 +993,7 @@ function createComparativeTemperatureChart() {
     }
     
     const datasets = [];
-    const sensorNames = ['externo', 'principal', 'meio', 'porta', 'fundo', 'piso', 'teto'];
+    const sensorNames = ['externo', 'dianteiro-direito', 'dianteiro-esquerdo', 'central-direito', 'central-esquerdo', 'fundo-direito', 'fundo-esquerdo'];
     
     // Obter labels do primeiro sensor que tenha dados
     let timeLabels = [];
@@ -1119,7 +1122,7 @@ function createComparativeHumidityChart() {
     }
     
     const datasets = [];
-    const sensorNames = ['externo', 'principal', 'meio', 'porta', 'fundo', 'piso', 'teto'];
+    const sensorNames = ['externo', 'dianteiro-direito', 'dianteiro-esquerdo', 'central-direito', 'central-esquerdo', 'fundo-direito', 'fundo-esquerdo'];
     
     let timeLabels = [];
     sensorNames.forEach(sensorName => {
@@ -1244,7 +1247,7 @@ function createTemperatureLegend() {
     const legendContainer = document.getElementById('temperature-legend');
     legendContainer.innerHTML = '';
     
-    const sensorNames = ['externo', 'principal', 'meio', 'porta', 'fundo', 'piso', 'teto'];
+    const sensorNames = ['externo', 'dianteiro-direito', 'dianteiro-esquerdo', 'central-direito', 'central-esquerdo', 'fundo-direito', 'fundo-esquerdo'];
     
     sensorNames.forEach(sensorName => {
         const sensor = sensorData[sensorName];
@@ -1288,7 +1291,7 @@ function createHumidityLegend() {
     const legendContainer = document.getElementById('humidity-legend');
     legendContainer.innerHTML = '';
     
-    const sensorNames = ['externo', 'principal', 'meio', 'porta', 'fundo', 'piso', 'teto'];
+    const sensorNames = ['externo', 'dianteiro-direito', 'dianteiro-esquerdo', 'central-direito', 'central-esquerdo', 'fundo-direito', 'fundo-esquerdo'];
     
     sensorNames.forEach(sensorName => {
         const sensor = sensorData[sensorName];
@@ -1396,7 +1399,7 @@ function toggleHumiditySensor(sensorName, show) {
 }
 
 function showAllTemperatureSensors() {
-    const sensorNames = ['externo', 'principal', 'meio', 'porta', 'fundo', 'piso', 'teto'];
+    const sensorNames = ['externo', 'dianteiro-direito', 'dianteiro-esquerdo', 'central-direito', 'central-esquerdo', 'fundo-direito', 'fundo-esquerdo'];
     sensorNames.forEach(sensorName => {
         if (sensorData[sensorName] && sensorData[sensorName].status !== 'Não Configurado') {
             visibleTemperatureSensors.add(sensorName);
@@ -1406,7 +1409,7 @@ function showAllTemperatureSensors() {
 }
 
 function hideAllTemperatureSensors() {
-    const sensorNames = ['externo', 'principal', 'meio', 'porta', 'fundo', 'piso', 'teto'];
+    const sensorNames = ['externo', 'dianteiro-direito', 'dianteiro-esquerdo', 'central-direito', 'central-esquerdo', 'fundo-direito', 'fundo-esquerdo'];
     sensorNames.forEach(sensorName => {
         visibleTemperatureSensors.delete(sensorName);
         toggleTemperatureSensor(sensorName, false);
@@ -1414,7 +1417,7 @@ function hideAllTemperatureSensors() {
 }
 
 function showAllHumiditySensors() {
-    const sensorNames = ['externo', 'principal', 'meio', 'porta', 'fundo', 'piso', 'teto'];
+    const sensorNames = ['externo', 'dianteiro-direito', 'dianteiro-esquerdo', 'central-direito', 'central-esquerdo', 'fundo-direito', 'fundo-esquerdo'];
     sensorNames.forEach(sensorName => {
         if (sensorData[sensorName] && sensorData[sensorName].status !== 'Não Configurado') {
             visibleHumiditySensors.add(sensorName);
@@ -1424,7 +1427,7 @@ function showAllHumiditySensors() {
 }
 
 function hideAllHumiditySensors() {
-    const sensorNames = ['externo', 'principal', 'meio', 'porta', 'fundo', 'piso', 'teto'];
+    const sensorNames = ['externo', 'dianteiro-direito', 'dianteiro-esquerdo', 'central-direito', 'central-esquerdo', 'fundo-direito', 'fundo-esquerdo'];
     sensorNames.forEach(sensorName => {
         visibleHumiditySensors.delete(sensorName);
         toggleHumiditySensor(sensorName, false);
@@ -1462,7 +1465,7 @@ function startChartUpdates() {
 }
 
 function updateTemperatureChartData() {
-    const sensorNames = ['externo', 'principal', 'meio', 'porta', 'fundo', 'piso', 'teto'];
+    const sensorNames = ['externo', 'dianteiro-direito', 'dianteiro-esquerdo', 'central-direito', 'central-esquerdo', 'fundo-direito', 'fundo-esquerdo'];
     
     sensorNames.forEach(sensorName => {
         const sensor = sensorData[sensorName];
@@ -1492,7 +1495,7 @@ function updateTemperatureChartData() {
 }
 
 function updateHumidityChartData() {
-    const sensorNames = ['externo', 'principal', 'meio', 'porta', 'fundo', 'piso', 'teto'];
+    const sensorNames = ['externo', 'dianteiro-direito', 'dianteiro-esquerdo', 'central-direito', 'central-esquerdo', 'fundo-direito', 'fundo-esquerdo'];
     
     sensorNames.forEach(sensorName => {
         const sensor = sensorData[sensorName];
@@ -1554,7 +1557,7 @@ function setupEventListeners() {
     document.getElementById('hide-all-humidity').addEventListener('click', hideAllHumiditySensors);
     
     if (Object.keys(sensorData).length > 0) {
-        updateSensorDetailsWithoutAffectingCharts('principal');
+        updateSensorDetailsWithoutAffectingCharts('dianteiro-direito');
     }
 }
 

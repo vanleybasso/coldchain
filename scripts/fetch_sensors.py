@@ -41,15 +41,15 @@ def fetch_current_sensor_data():
         
         print(f"Encontrados {len(results)} registros atuais dos sensores")
         
-        # Mapeamento dos sensores
+        # NOVO MAPEAMENTO DOS SENSORES
         sensor_mapping = {
             0: "externo",
-            1: "principal", 
-            2: "meio",
-            3: "porta",
-            4: "fundo",
-            5: "piso",
-            6: "teto"
+            1: "dianteiro-direito", 
+            2: "dianteiro-esquerdo",
+            3: "central-direito",
+            4: "central-esquerdo",
+            5: "fundo-direito",
+            6: "fundo-esquerdo"
         }
         
         # Processar resultados
@@ -204,17 +204,18 @@ def generate_mock_history_for_period(time_range, sensor_index):
     """
     print(f"Gerando dados mock para sensor {sensor_index} - período: {time_range}")
     
+    # NOVO MAPEAMENTO DOS SENSORES
     sensor_mapping = {
         0: "externo",
-        1: "principal", 
-        2: "meio",
-        3: "porta",
-        4: "fundo",
-        5: "piso",
-        6: "teto"
+        1: "dianteiro-direito", 
+        2: "dianteiro-esquerdo",
+        3: "central-direito",
+        4: "central-esquerdo",
+        5: "fundo-direito",
+        6: "fundo-esquerdo"
     }
     
-    sensor_name = sensor_mapping.get(sensor_index, "principal")
+    sensor_name = sensor_mapping.get(sensor_index, "dianteiro-direito")
     
     # Definir parâmetros baseados no período
     if time_range == '1h':
@@ -238,8 +239,8 @@ def generate_mock_history_for_period(time_range, sensor_index):
         base_temp = 3.5 if sensor_name != 'externo' else 24.0
         minutes_between_points = 30
     
-    # Ajustar base_temp para sensor da porta (normalmente mais quente)
-    if sensor_name == 'porta':
+    # Ajustar base_temp para sensor central direito (normalmente mais quente)
+    if sensor_name == 'central-direito':
         base_temp += 2.0
     
     history = []
@@ -270,14 +271,15 @@ def generate_mock_history_for_period(time_range, sensor_index):
 
 def get_all_sensors_history_with_time_range(time_range='6h'):
     """Busca histórico para todos os sensores baseado no período selecionado"""
+    # NOVO MAPEAMENTO DOS SENSORES
     sensor_mapping = {
         0: "externo",
-        1: "principal", 
-        2: "meio",
-        3: "porta",
-        4: "fundo",
-        5: "piso",
-        6: "teto"
+        1: "dianteiro-direito", 
+        2: "dianteiro-esquerdo",
+        3: "central-direito",
+        4: "central-esquerdo",
+        5: "fundo-direito",
+        6: "fundo-esquerdo"
     }
     
     all_history = {}
@@ -303,32 +305,32 @@ def create_fallback_data_with_unconfigured():
             "humidity": 65.0,
             "last_read": now_brazil.isoformat()
         },
-        "principal": {
+        "dianteiro-direito": {
             "temperature": 3.2,
             "humidity": 54.0,
             "last_read": now_brazil.isoformat()
         },
-        "meio": {
+        "dianteiro-esquerdo": {
             "temperature": 3.5,
             "humidity": 55.0,
             "last_read": now_brazil.isoformat()
         },
-        "porta": {
+        "central-direito": {
             "temperature": 0.0,
             "humidity": 0.0,
             "last_read": now_brazil.isoformat()
         },
-        "fundo": {
+        "central-esquerdo": {
             "temperature": 0.0,
             "humidity": 0.0,
             "last_read": now_brazil.isoformat()
         },
-        "piso": {
+        "fundo-direito": {
             "temperature": 0.0,
             "humidity": 0.0,
             "last_read": now_brazil.isoformat()
         },
-        "teto": {
+        "fundo-esquerdo": {
             "temperature": 0.0,
             "humidity": 0.0,
             "last_read": now_brazil.isoformat()

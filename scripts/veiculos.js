@@ -362,7 +362,7 @@ function getFallbackData() {
     ];
 }
 
-// Dados de sensores de fallback para KG8000003
+// Dados de sensores de fallback para KG8000003 - ATUALIZADO COM NOVOS NOMES
 function getFallbackSensorData() {
     const now = new Date().toISOString();
     return {
@@ -371,44 +371,45 @@ function getFallbackSensorData() {
             "humidity": 65.0,
             "last_read": now
         },
-        "principal": {
+        "dianteiro-direito": {
             "temperature": 3.2,
             "humidity": 54.0,
             "last_read": now
         },
-        "meio": {
+        "dianteiro-esquerdo": {
             "temperature": 3.5,
             "humidity": 55.0,
             "last_read": now
         },
-        "porta": {
-            "temperature": 6.8,
-            "humidity": 58.0,
-            "last_read": now
-        },
-        "fundo": {
-            "temperature": 2.9,
-            "humidity": 53.0,
-            "last_read": now
-        },
-        "piso": {
+        "central-direito": {
             "temperature": 3.1,
             "humidity": 56.0,
             "last_read": now
         },
-        "teto": {
+        "central-esquerdo": {
             "temperature": 3.3,
             "humidity": 54.5,
+            "last_read": now
+        },
+        "fundo-direito": {
+            "temperature": 2.9,
+            "humidity": 53.0,
+            "last_read": now
+        },
+        "fundo-esquerdo": {
+            "temperature": 3.0,
+            "humidity": 54.0,
             "last_read": now
         }
     };
 }
 
-// Função para calcular temperatura média dos sensores internos
+// Função para calcular temperatura média dos sensores internos - ATUALIZADA
 function calculateAverageTemperature(sensorData) {
     if (!sensorData) return '--°C';
     
-    const internalSensors = ['principal', 'meio', 'porta', 'fundo', 'piso', 'teto'];
+    // NOVOS NOMES DOS SENSORES INTERNOS
+    const internalSensors = ['dianteiro-direito', 'dianteiro-esquerdo', 'central-direito', 'central-esquerdo', 'fundo-direito', 'fundo-esquerdo'];
     let totalTemp = 0;
     let validSensors = 0;
     
@@ -464,7 +465,7 @@ function getLastUpdateTime(sensorData) {
     return '--';
 }
 
-// Função para criar tooltip dos sensores
+// Função para criar tooltip dos sensores - ATUALIZADA
 function createSensorTooltip(sensorData, lastUpdate) {
     if (!sensorData) {
         return '<div class="sensor-item"><span class="sensor-name">Sem dados de sensores</span></div>';
@@ -473,8 +474,8 @@ function createSensorTooltip(sensorData, lastUpdate) {
     let tooltipHTML = '';
     let hasData = false;
     
-    // Ordem específica para mostrar os sensores
-    const sensorOrder = ['externo', 'principal', 'meio', 'porta', 'fundo', 'piso', 'teto'];
+    // NOVA ORDEM DOS SENSORES
+    const sensorOrder = ['externo', 'dianteiro-direito', 'dianteiro-esquerdo', 'central-direito', 'central-esquerdo', 'fundo-direito', 'fundo-esquerdo'];
     
     sensorOrder.forEach(sensorName => {
         const sensor = sensorData[sensorName];
@@ -524,15 +525,16 @@ function generateRandomRoute() {
     return routes[Math.floor(Math.random() * routes.length)];
 }
 
+// Função para obter nome de exibição do sensor - ATUALIZADA
 function getSensorDisplayName(sensorName) {
     const names = {
-        'externo': 'Sensor Externo',
-        'principal': 'Sensor Principal',
-        'meio': 'Sensor do Meio',
-        'porta': 'Sensor da Porta',
-        'fundo': 'Sensor do Fundo',
-        'piso': 'Sensor do Piso',
-        'teto': 'Sensor do Teto'
+        'externo': 'Externo',
+        'dianteiro-direito': 'Dianteiro Direito',
+        'dianteiro-esquerdo': 'Dianteiro Esquerdo',
+        'central-direito': 'Central Direito',
+        'central-esquerdo': 'Central Esquerdo',
+        'fundo-direito': 'Fundo Direito',
+        'fundo-esquerdo': 'Fundo Esquerdo'
     };
     return names[sensorName] || sensorName;
 }

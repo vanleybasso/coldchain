@@ -308,7 +308,7 @@ body {
     color: var(--dark);
 }
 
-/* Dashboard */
+/* Dashboard - AGORA COM 3 CARDS */
 .dashboard {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -585,36 +585,36 @@ body {
     z-index: 30;
 }
 
-/* Sensor positions */
-.sensor[data-sensor="principal"] {
-    top: 40%;
-    left: 30%;
+/* NOVAS POSIÇÕES DOS SENSORES - COM NOVOS NOMES */
+.sensor[data-sensor="dianteiro-direito"] {
+    top: 20%;
+    left: 25%;
     transform: translate(-50%, -50%);
 }
 
-.sensor[data-sensor="meio"] {
-    top: 45%;
+.sensor[data-sensor="dianteiro-esquerdo"] {
+    top: 40%;
+    left: 22.5%;
+}
+
+.sensor[data-sensor="central-direito"] {
+    top: 30%;
     left: 40%;
 }
 
-.sensor[data-sensor="porta"] {
-    top: 65%;
-    left: 76%;
+.sensor[data-sensor="central-esquerdo"] {
+    top: 60%;
+    left: 40%;
 }
 
-.sensor[data-sensor="fundo"] {
-    top: 55%;
+.sensor[data-sensor="fundo-direito"] {
+    top: 47%;
     left: 60%;
 }
 
-.sensor[data-sensor="piso"] {
-    top: 70%;
-    left: 50%;
-}
-
-.sensor[data-sensor="teto"] {
-    top: 20%;
-    left: 50%;
+.sensor[data-sensor="fundo-esquerdo"] {
+    top: 80%;
+    left: 59%;
 }
 
 .sensor[data-sensor="externo"] {
@@ -1025,23 +1025,23 @@ body {
     font-weight: 600;
 }
 
-/* Cores específicas para cada sensor no gráfico de temperatura */
+/* NOVAS CORES ESPECÍFICAS PARA CADA SENSOR - COM NOVOS NOMES */
 .sensor-color-externo { background-color: #FF6B6B; }
-.sensor-color-principal { background-color: #4ECDC4; }
-.sensor-color-meio { background-color: #45B7D1; }
-.sensor-color-porta { background-color: #FFA07A; }
-.sensor-color-fundo { background-color: #98D8C8; }
-.sensor-color-piso { background-color: #F7DC6F; }
-.sensor-color-teto { background-color: #BB8FCE; }
+.sensor-color-dianteiro-direito { background-color: #4ECDC4; }
+.sensor-color-dianteiro-esquerdo { background-color: #45B7D1; }
+.sensor-color-central-direito { background-color: #FFA07A; }
+.sensor-color-central-esquerdo { background-color: #98D8C8; }
+.sensor-color-fundo-direito { background-color: #F7DC6F; }
+.sensor-color-fundo-esquerdo { background-color: #BB8FCE; }
 
-/* Cores específicas para cada sensor no gráfico de umidade */
+/* Cores específicas para cada sensor no gráfico de umidade - NOVOS NOMES */
 .sensor-humidity-color-externo { background-color: #E74C3C; }
-.sensor-humidity-color-principal { background-color: #3498DB; }
-.sensor-humidity-color-meio { background-color: #2ECC71; }
-.sensor-humidity-color-porta { background-color: #F39C12; }
-.sensor-humidity-color-fundo { background-color: #9B59B6; }
-.sensor-humidity-color-piso { background-color: #1ABC9C; }
-.sensor-humidity-color-teto { background-color: #D35400; }
+.sensor-humidity-color-dianteiro-direito { background-color: #3498DB; }
+.sensor-humidity-color-dianteiro-esquerdo { background-color: #2ECC71; }
+.sensor-humidity-color-central-direito { background-color: #F39C12; }
+.sensor-humidity-color-central-esquerdo { background-color: #9B59B6; }
+.sensor-humidity-color-fundo-direito { background-color: #1ABC9C; }
+.sensor-humidity-color-fundo-esquerdo { background-color: #D35400; }
 
 /* Ajustes para os gráficos */
 .chart-container {
@@ -1200,6 +1200,13 @@ body {
     .temperature-chart,
     .humidity-chart {
         height: 450px;
+    }
+}
+
+/* Para telas maiores, garantir 3 cards por linha */
+@media (min-width: 1200px) {
+    .dashboard {
+        grid-template-columns: repeat(3, 1fr);
     }
 }
 

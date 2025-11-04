@@ -91,25 +91,13 @@ function updateDashboardWithRealData() {
     const totalVehicles = 1; // Apenas KG8000003
     const avgTemperature = calculateAverageTemperature();
     const activeAlerts = countActiveAlerts();
-    const fuelEconomy = generateRandomFuelEconomy();
     
     // Atualizar cards do dashboard
     document.getElementById('total-vehicles').querySelector('.loading-content').textContent = totalVehicles;
     document.getElementById('avg-temperature').querySelector('.loading-content').textContent = `${avgTemperature}°C`;
     document.getElementById('active-alerts').querySelector('.loading-content').textContent = activeAlerts;
-    document.getElementById('fuel-economy').querySelector('.loading-content').textContent = `${fuelEconomy} km/L`;
     
-    // Calcular variação do combustível
-    const fuelTarget = 8.2;
-    const fuelVariation = ((fuelEconomy - fuelTarget) / fuelTarget * 100).toFixed(1);
-    const fuelVariationElement = document.getElementById('fuel-variation');
-    fuelVariationElement.textContent = `${fuelVariation}%`;
-    
-    if (parseFloat(fuelVariation) >= 0) {
-        fuelVariationElement.className = 'status normal';
-    } else {
-        fuelVariationElement.className = 'status warning';
-    }
+    // REMOVIDO: Card de economia de combustível
     
     // Remover loading dos cards
     document.querySelectorAll('.card').forEach(card => {
@@ -125,7 +113,8 @@ function updateDashboardWithRealData() {
 
 // Função para calcular temperatura média dos sensores internos
 function calculateAverageTemperature() {
-    const internalSensors = ['principal', 'meio', 'porta', 'fundo', 'piso', 'teto'];
+    // NOVOS NOMES DOS SENSORES INTERNOS
+    const internalSensors = ['dianteiro-direito', 'dianteiro-esquerdo', 'central-direito', 'central-esquerdo', 'fundo-direito', 'fundo-esquerdo'];
     let totalTemp = 0;
     let validSensors = 0;
     
@@ -163,10 +152,7 @@ function countActiveAlerts() {
     return alertCount;
 }
 
-// Gerar economia de combustível aleatória
-function generateRandomFuelEconomy() {
-    return (7 + Math.random() * 1.5).toFixed(1);
-}
+// REMOVIDO: Função generateRandomFuelEconomy
 
 // Contar sensores configurados
 function countConfiguredSensors() {
@@ -223,8 +209,8 @@ function createSensorTooltip(sensorData, lastUpdate) {
     let tooltipHTML = '';
     let hasData = false;
     
-    // Ordem específica para mostrar os sensores
-    const sensorOrder = ['externo', 'principal', 'meio', 'porta', 'fundo', 'piso', 'teto'];
+    // NOVA ORDEM DOS SENSORES
+    const sensorOrder = ['externo', 'dianteiro-direito', 'dianteiro-esquerdo', 'central-direito', 'central-esquerdo', 'fundo-direito', 'fundo-esquerdo'];
     
     sensorOrder.forEach(sensorName => {
         const sensor = sensorData[sensorName];
@@ -303,29 +289,29 @@ function hideTooltip(event) {
     }
 }
 
-// Funções auxiliares para nomes de sensores
+// NOVAS FUNÇÕES AUXILIARES PARA NOMES DOS SENSORES
 function getSensorDisplayName(sensorName) {
     const names = {
-        'externo': 'Sensor Externo',
-        'principal': 'Sensor Principal',
-        'meio': 'Sensor do Meio',
-        'porta': 'Sensor da Porta',
-        'fundo': 'Sensor do Fundo',
-        'piso': 'Sensor do Piso',
-        'teto': 'Sensor do Teto'
+        'externo': 'Externo',
+        'dianteiro-direito': 'Dianteiro Direito',
+        'dianteiro-esquerdo': 'Dianteiro Esquerdo',
+        'central-direito': 'Central Direito',
+        'central-esquerdo': 'Central Esquerdo',
+        'fundo-direito': 'Fundo Direito',
+        'fundo-esquerdo': 'Fundo Esquerdo'
     };
     return names[sensorName] || sensorName;
 }
 
 function getSensorLocation(sensorName) {
     const locations = {
-        'externo': 'Externo',
-        'principal': 'Centro da carga',
-        'meio': 'Meio da carga',
-        'porta': 'Perto da porta',
-        'fundo': 'Fundo do veículo',
-        'piso': 'Piso dianteiro',
-        'teto': 'Teto traseiro'
+        'externo': 'Externo do veículo',
+        'dianteiro-direito': 'Parte dianteira direita',
+        'dianteiro-esquerdo': 'Parte dianteira esquerda',
+        'central-direito': 'Centro direito da carga',
+        'central-esquerdo': 'Centro esquerdo da carga',
+        'fundo-direito': 'Fundo direito',
+        'fundo-esquerdo': 'Fundo esquerdo'
     };
     return locations[sensorName] || 'Localização desconhecida';
 }
@@ -514,7 +500,8 @@ function createTemperatureChart() {
 
 // Calcular histórico de temperatura média
 function calculateAverageTemperatureHistory() {
-    const internalSensors = ['principal', 'meio', 'porta', 'fundo', 'piso', 'teto'];
+    // NOVOS NOMES DOS SENSORES INTERNOS
+    const internalSensors = ['dianteiro-direito', 'dianteiro-esquerdo', 'central-direito', 'central-esquerdo', 'fundo-direito', 'fundo-esquerdo'];
     const labels = [];
     const data = [];
     
@@ -594,7 +581,7 @@ function createStatusChart() {
     statusChart = new Chart(ctx2d, {
         type: 'doughnut',
         data: {
-            labels: ['Normal', 'Alerta', 'Crítico'], // CORRIGIDO: 'Normal' em vez de 'Status'
+            labels: ['Normal', 'Alerta', 'Crítico'],
             datasets: [{
                 data: statusData,
                 backgroundColor: ['#2EAD61', '#ECDD13', '#EC2513'], // Verde, Amarelo, Vermelho
@@ -933,7 +920,8 @@ function useFallbackData() {
     document.getElementById('total-vehicles').querySelector('.loading-content').textContent = '1';
     document.getElementById('avg-temperature').querySelector('.loading-content').textContent = '3.2°C';
     document.getElementById('active-alerts').querySelector('.loading-content').textContent = '1';
-    document.getElementById('fuel-economy').querySelector('.loading-content').textContent = '7.8 km/L';
+    
+    // REMOVIDO: Dados de combustível
     
     // Remover loading
     document.querySelectorAll('.card').forEach(card => {
