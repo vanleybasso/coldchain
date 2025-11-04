@@ -1,0 +1,37 @@
+{
+  "externo": {
+    "temperature": 23.5,
+    "humidity": 0.0,
+    "last_read": "2025-11-04T10:44:06-03:00"
+  },
+  "principal": {
+    "temperature": 21.7,
+    "humidity": 69.0,
+    "last_read": "2025-11-04T10:44:06-03:00"
+  },
+  "meio": {
+    "temperature": 21.7,
+    "humidity": 69.0,
+    "last_read": "2025-11-04T10:44:06-03:00"
+  },
+  "porta": {
+    "temperature": 21.7,
+    "humidity": 69.0,
+    "last_read": "2025-11-04T10:44:06-03:00"
+  },
+  "fundo": {
+    "temperature": 22.0,
+    "humidity": 69.0,
+    "last_read": "2025-11-04T10:44:06-03:00"
+  },
+  "piso": {
+    "temperature": 21.7,
+    "humidity": 70.0,
+    "last_read": "2025-11-04T10:44:06-03:00"
+  },
+  "teto": {
+    "temperature": 21.8,
+    "humidity": 69.0,
+    "last_read": "2025-11-04T10:44:06-03:00"
+  }
+}

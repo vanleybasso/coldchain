@@ -4,31 +4,145 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detalhes do Veículo - RotaSystem</title>
+     <!-- Favicon da empresa -->
+    <link rel="icon" type="image/x-icon" href="/rotasystem.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="./styles/descricao.css">
     <!-- Adicionar Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Loading Overlay Global - SIMPLIFICADO */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            flex-direction: column;
+            transition: opacity 0.3s ease;
+        }
+
+        .loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(46, 167, 173, 0.2);
+            border-radius: 50%;
+            border-top: 4px solid #2EA7AD;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2EA7AD;
+        }
+
+        /* Melhorias de responsividade */
+        @media (max-width: 768px) {
+            .loading-spinner {
+                width: 50px;
+                height: 50px;
+            }
+
+            .loading-title {
+                font-size: 16px;
+            }
+        }
+    </style>
 </head>
 <body>
+    <!-- Loading Overlay - SIMPLIFICADO -->
+    <div class="loading-overlay" id="globalLoading">
+        <div class="loading-spinner"></div>
+        <div class="loading-title">Carregando Detalhes do Veículo</div>
+    </div>
+
     <div class="container">
-        <!-- Sidebar -->
+        <!-- Sidebar Modernizado e Fixo -->
         <aside class="sidebar">
-            <div class="logo">
-                <img src="/logo.png" alt="RotaSystem Logo">
-            </div>
-            
-            <ul class="menu">
-                <li><a href="index.html"><i class="fas fa-home"></i> Dashboard</a></li>
-                <li><a href="veiculos.html" class="active"><i class="fas fa-truck"></i> Veículos</a></li>
-                <li><a href="rotas.html"><i class="fas fa-route"></i> Rotas</a></li>
-                <li><a href="temperaturas.html"><i class="fas fa-thermometer-half"></i> Temperaturas</a></li>
-                <li><a href="alertas.html"><i class="fas fa-exclamation-triangle"></i> Alertas</a></li>
-                <li><a href="#"><i class="fas fa-sign-out-alt"></i> Sair</a></li>
-            </ul>
-            
-            <!-- Nova logo adicionada no final do sidebar -->
-            <div class="logo-bottom">
-                <img src="niju.png" alt="Niju Logo" class="bottom-logo">
+            <div class="sidebar-content">
+                <div class="logo-container">
+                    <div class="logo">
+                        <img src="/logo.png" alt="RotaSystem Logo">
+                    </div>
+                    <div class="logo-glow"></div>
+                </div>
+                
+                <ul class="menu">
+                    <li>
+                        <a href="index.html" class="menu-item">
+                            <div class="menu-icon">
+                                <i class="fas fa-home"></i>
+                            </div>
+                            <span class="menu-text">Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="veiculos.html" class="menu-item active">
+                            <div class="menu-icon">
+                                <i class="fas fa-truck"></i>
+                            </div>
+                            <span class="menu-text">Veículos</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="rotas.html" class="menu-item">
+                            <div class="menu-icon">
+                                <i class="fas fa-route"></i>
+                            </div>
+                            <span class="menu-text">Rotas</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="temperaturas.html" class="menu-item">
+                            <div class="menu-icon">
+                                <i class="fas fa-thermometer-half"></i>
+                            </div>
+                            <span class="menu-text">Temperaturas</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="alertas.html" class="menu-item">
+                            <div class="menu-icon">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <span class="menu-text">Alertas</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="menu-item logout-item" id="logoutBtn">
+                            <div class="menu-icon">
+                                <i class="fas fa-sign-out-alt"></i>
+                            </div>
+                            <span class="menu-text">Sair</span>
+                        </a>
+                    </li>
+                    
+                    <!-- Logo da Niju APÓS o botão Sair -->
+                    <li class="niju-menu-item">
+                        <div class="niju-logo-container">
+                            <div class="niju-logo">
+                                <img src="niju.png" alt="Niju Logo">
+                            </div>
+                        </div>
+                    </li>
+                </ul>
             </div>
         </aside>
         
@@ -40,76 +154,65 @@
                     <h2 id="page-title">Detalhes do Veículo</h2>
                 </div>
                 <div class="user-info">
-                    <img src="https://ui-avatars.com/api/?name=Operador&background=2EA7AD&color=fff" alt="User">
-                    <span>Operador</span>
+                    <img src="./rotasystem.png" alt="Rota System Logo" class="company-logo">
+                    <span>Rota System</span>
                 </div>
             </div>
             
-            <!-- Vehicle Overview -->
-            <div class="vehicle-overview">
-                <div class="vehicle-card">
+            <!-- Dashboard acima da foto do caminhão -->
+            <div class="dashboard">
+                <div class="dashboard-card">
                     <div class="card-header">
-                        <div class="card-title">Informações do Veículo</div>
-                        <span class="status-badge" id="vehicle-status">Ativo</span>
+                        <div class="card-title">Consumo de Combustível</div>
                     </div>
-                    <div class="card-content">
-                        <div class="info-item">
-                            <div class="info-label">Placa</div>
-                            <div class="info-value" id="vehicle-plate">--</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Modelo</div>
-                            <div class="info-value" id="vehicle-model">--</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Ano</div>
-                            <div class="info-value" id="vehicle-year">--</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Capacidade</div>
-                            <div class="info-value" id="vehicle-capacity">--</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Tipo</div>
-                            <div class="info-value" id="vehicle-type">--</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Motorista</div>
-                            <div class="info-value" id="vehicle-driver">--</div>
-                        </div>
+                    <div class="dashboard-value" id="fuel-consumption">--</div>
+                    <div class="dashboard-label">Média de consumo</div>
+                    <div class="dashboard-change positive" id="fuel-change">
+                        <i class="fas fa-arrow-down"></i> 2.3% em relação ao mês anterior
                     </div>
                 </div>
                 
-                <div class="vehicle-card">
+                <div class="dashboard-card">
                     <div class="card-header">
-                        <div class="card-title">Status da Operação</div>
+                        <div class="card-title">Temperatura Média</div>
                     </div>
-                    <div class="card-content">
-                        <div class="info-item">
-                            <div class="info-label">Rota Atual</div>
-                            <div class="info-value" id="vehicle-route">--</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Status da Viagem</div>
-                            <div class="info-value" id="vehicle-trip-status">--</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Última Atualização</div>
-                            <div class="info-value" id="vehicle-last-update">--</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Localização</div>
-                            <div class="info-value" id="vehicle-location">--</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Temperatura Média</div>
-                            <div class="info-value" id="vehicle-avg-temp">--</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Próxima Parada</div>
-                            <div class="info-value" id="vehicle-next-stop">--</div>
-                        </div>
+                    <div class="dashboard-value" id="avg-temperature">--</div>
+                    <div class="dashboard-label">Faixa ideal: 2°C a 5°C</div>
+                    <div class="dashboard-change positive" id="temp-status">
+                        <i class="fas fa-check-circle"></i> Dentro da faixa ideal
                     </div>
+                </div>
+                
+                <div class="dashboard-card" id="doors-card">
+                    <div class="card-header">
+                        <div class="card-title">Portas</div>
+                    </div>
+                    <div class="dashboard-value" id="doors-status">--</div>
+                    <div class="dashboard-label" id="doors-label">Porta traseira fechada</div>
+                    <div class="dashboard-change positive" id="doors-change">
+                        <i class="fas fa-check-circle"></i> Status normal
+                    </div>
+                </div>
+                
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <div class="card-title">Status do Refrigerador</div>
+                    </div>
+                    <div class="dashboard-value" id="refrigerator-status">--</div>
+                    <div class="dashboard-label">Estado do equipamento</div>
+                    <div class="dashboard-change positive" id="refrigerator-change">
+                        <i class="fas fa-check-circle"></i> Operação normal
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sensors Grid - AGORA AQUI: entre Dashboard e foto do caminhão -->
+            <div class="vehicle-card">
+                <div class="card-header">
+                    <div class="card-title">Todos os Sensores</div>
+                </div>
+                <div class="sensors-grid" id="sensors-grid">
+                    <!-- Os sensores serão carregados dinamicamente aqui -->
                 </div>
             </div>
             
@@ -196,99 +299,156 @@
                 </div>
             </div>
             
-            <!-- Dashboard -->
-            <div class="dashboard">
-                <div class="dashboard-card">
+            <!-- Gráficos de Temperatura e Umidade lado a lado -->
+            <div class="charts-row">
+                <!-- Temperature Chart -->
+                <div class="temperature-chart">
                     <div class="card-header">
-                        <div class="card-title">Consumo de Combustível</div>
+                        <div class="card-title">Gráfico de Temperatura - Todos os Sensores (Últimas 12h)</div>
+                        <div class="chart-controls">
+                            <button class="btn-chart-control" id="show-all-temp">
+                                <i class="fas fa-layer-group"></i> Mostrar Todos
+                            </button>
+                            <button class="btn-chart-control" id="hide-all-temp">
+                                <i class="fas fa-eye-slash"></i> Ocultar Todos
+                            </button>
+                        </div>
                     </div>
-                    <div class="dashboard-value" id="fuel-consumption">--</div>
-                    <div class="dashboard-label">Média de consumo</div>
-                    <div class="dashboard-change positive" id="fuel-change">
-                        <i class="fas fa-arrow-down"></i> 2.3% em relação ao mês anterior
+                    <div class="chart-container">
+                        <canvas id="temperatureChart"></canvas>
+                    </div>
+                    <div class="chart-legend" id="temperature-legend">
+                        <div class="legend-title">Clique nos sensores para mostrar/ocultar:</div>
+                        <!-- Legendas serão geradas dinamicamente -->
                     </div>
                 </div>
                 
-                <div class="dashboard-card">
+                <!-- Humidity Chart -->
+                <div class="humidity-chart">
                     <div class="card-header">
-                        <div class="card-title">Temperatura Média</div>
+                        <div class="card-title">Gráfico de Umidade - Todos os Sensores (Últimas 12h)</div>
+                        <div class="chart-controls">
+                            <button class="btn-chart-control" id="show-all-humidity">
+                                <i class="fas fa-layer-group"></i> Mostrar Todos
+                            </button>
+                            <button class="btn-chart-control" id="hide-all-humidity">
+                                <i class="fas fa-eye-slash"></i> Ocultar Todos
+                            </button>
+                        </div>
                     </div>
-                    <div class="dashboard-value" id="avg-temperature">--</div>
-                    <div class="dashboard-label">Faixa ideal: 2°C a 5°C</div>
-                    <div class="dashboard-change positive" id="temp-status">
-                        <i class="fas fa-check-circle"></i> Dentro da faixa ideal
+                    <div class="chart-container">
+                        <canvas id="humidityChart"></canvas>
                     </div>
-                </div>
-                
-                <div class="dashboard-card" id="doors-card">
-                    <div class="card-header">
-                        <div class="card-title">Portas</div>
-                    </div>
-                    <div class="dashboard-value" id="doors-status">--</div>
-                    <div class="dashboard-label" id="doors-label">Porta traseira fechada</div>
-                    <div class="dashboard-change positive" id="doors-change">
-                        <i class="fas fa-check-circle"></i> Status normal
-                    </div>
-                </div>
-                
-                <div class="dashboard-card">
-                    <div class="card-header">
-                        <div class="card-title">Status do Refrigerador</div>
-                    </div>
-                    <div class="dashboard-value" id="refrigerator-status">--</div>
-                    <div class="dashboard-label">Consumo: 45%</div>
-                    <div class="dashboard-change positive" id="refrigerator-change">
-                        <i class="fas fa-check-circle"></i> Operação normal
+                    <div class="chart-legend" id="humidity-legend">
+                        <div class="legend-title">Clique nos sensores para mostrar/ocultar:</div>
+                        <!-- Legendas serão geradas dinamicamente -->
                     </div>
                 </div>
             </div>
             
-            <!-- Sensors Grid -->
-            <div class="vehicle-card">
-                <div class="card-header">
-                    <div class="card-title">Todos os Sensores</div>
-                </div>
-                <div class="sensors-grid" id="sensors-grid">
-                    <!-- Os sensores serão carregados dinamicamente aqui -->
-                </div>
-            </div>
-            
-            <!-- Temperature Chart -->
-            <div class="temperature-chart">
-                <div class="card-header">
-                    <div class="card-title">Variação de Temperatura (Últimas 24h)</div>
-                </div>
-                <div class="chart-container">
-                    <canvas id="temperatureChart"></canvas>
-                </div>
-                <div class="chart-legend">
-                    <div class="legend-item">
-                        <span class="legend-color ideal"></span>
-                        <span class="legend-text">Faixa Ideal (2-5°C)</span>
+            <!-- Vehicle Overview abaixo do gráfico -->
+            <div class="vehicle-overview">
+                <div class="vehicle-card">
+                    <div class="card-header">
+                        <div class="card-title">Informações do Veículo</div>
+                        <span class="status-badge" id="vehicle-status">Ativo</span>
                     </div>
-                    <div class="legend-item">
-                        <span class="legend-color warning"></span>
-                        <span class="legend-text">Atenção (5-7°C)</span>
-                    </div>
-                    <div class="legend-item">
-                        <span class="legend-color critical"></span>
-                        <span class="legend-text">Crítico (>7°C)</span>
+                    <div class="card-content">
+                        <div class="info-item">
+                            <div class="info-label">Placa</div>
+                            <div class="info-value" id="vehicle-plate">--</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Modelo</div>
+                            <div class="info-value" id="vehicle-model">--</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Ano</div>
+                            <div class="info-value" id="vehicle-year">--</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Capacidade</div>
+                            <div class="info-value" id="vehicle-capacity">--</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Tipo</div>
+                            <div class="info-value" id="vehicle-type">--</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Motorista</div>
+                            <div class="info-value" id="vehicle-driver">--</div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            
-            <!-- Actions -->
-            <div class="actions">
-                <button class="btn btn-secondary">
-                    <i class="fas fa-print"></i> Imprimir Relatório
-                </button>
-                <button class="btn btn-primary">
-                    <i class="fas fa-history"></i> Histórico Completo
-                </button>
+                
+                <div class="vehicle-card">
+                    <div class="card-header">
+                        <div class="card-title">Status da Operação</div>
+                    </div>
+                    <div class="card-content">
+                        <div class="info-item">
+                            <div class="info-label">Rota Atual</div>
+                            <div class="info-value" id="vehicle-route">--</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Status da Viagem</div>
+                            <div class="info-value" id="vehicle-trip-status">--</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Última Atualização</div>
+                            <div class="info-value" id="vehicle-last-update">--</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Localização</div>
+                            <div class="info-value" id="vehicle-location">--</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Temperatura Média</div>
+                            <div class="info-value" id="vehicle-avg-temp">--</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Próxima Parada</div>
+                            <div class="info-value" id="vehicle-next-stop">--</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
 
     <script src="./scripts/descricao.js"></script>
+    <script>
+        // Sistema de Loading Simplificado
+        function showLoading() {
+            const loadingOverlay = document.getElementById('globalLoading');
+            if (loadingOverlay) {
+                loadingOverlay.classList.remove('hidden');
+            }
+        }
+
+        function hideLoading() {
+            const loadingOverlay = document.getElementById('globalLoading');
+            if (loadingOverlay) {
+                loadingOverlay.classList.add('hidden');
+            }
+        }
+
+        // Mostrar loading ao carregar a página
+        document.addEventListener('DOMContentLoaded', function() {
+            showLoading();
+            
+            // Esconder loading após carregamento
+            setTimeout(() => {
+                hideLoading();
+            }, 800);
+        });
+
+        // Evento de logout
+        document.getElementById('logoutBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            localStorage.removeItem('loggedIn');
+            window.location.href = 'index.html';
+        });
+    </script>
 </body>
 </html>

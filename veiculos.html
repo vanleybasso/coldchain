@@ -4,31 +4,294 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RotaSystem - Gestão de Veículos</title>
+     <!-- Favicon da empresa -->
+    <link rel="icon" type="image/x-icon" href="/rotasystem.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="./styles/veiculos.css">
-    <!-- Adicionar Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Loading Overlay Global - SIMPLIFICADO */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            flex-direction: column;
+            transition: opacity 0.3s ease;
+        }
+
+        .loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(46, 167, 173, 0.2);
+            border-radius: 50%;
+            border-top: 4px solid #2EA7AD;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2EA7AD;
+        }
+
+        /* Melhorias de responsividade */
+        @media (max-width: 768px) {
+            .loading-spinner {
+                width: 50px;
+                height: 50px;
+            }
+
+            .loading-title {
+                font-size: 16px;
+            }
+        }
+
+        /* Estilos para os filtros */
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 10px;
+        }
+
+        .btn-clear {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            height: 36px;
+        }
+
+        .btn-clear:hover {
+            background-color: #c82333;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+        }
+
+        /* Estilos antigos mantidos para outras funcionalidades */
+        .card-loading {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-loading::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .table-loading {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .table-loading::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+            animation: shimmer 1.5s infinite;
+        }
+
+        .chart-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 200px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .loading-content {
+            display: none;
+        }
+
+        .content-loaded .loading-content {
+            display: block;
+        }
+
+        .content-loaded .loading-placeholder {
+            display: none;
+        }
+
+        .btn-loading {
+            position: relative;
+        }
+
+        .btn-loading .btn-text {
+            visibility: hidden;
+        }
+
+        .btn-loading .spinner {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            margin: 0;
+        }
+
+        .filters-loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .modal-loading {
+            position: relative;
+        }
+
+        .modal-loading::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .modal-loading::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 3px solid #2EA7AD;
+            animation: spin 1s linear infinite;
+            z-index: 11;
+        }
+    </style>
 </head>
 <body>
+    <!-- Loading Overlay Global - SIMPLIFICADO -->
+    <div class="loading-overlay" id="globalLoading">
+        <div class="loading-spinner"></div>
+        <div class="loading-title">Carregando Gestão de Veículos</div>
+    </div>
+
     <div class="container">
-        <!-- Sidebar -->
+        <!-- Sidebar Modernizado e Fixo -->
         <aside class="sidebar">
-            <div class="logo">
-                <img src="/logo.png" alt="RotaSystem Logo">
-            </div>
-            
-            <ul class="menu">
-                <li><a href="index.html"><i class="fas fa-home"></i> Dashboard</a></li>
-                <li><a href="veiculos.html" class="active"><i class="fas fa-truck"></i> Veículos</a></li>
-                <li><a href="rotas.html"><i class="fas fa-route"></i> Rotas</a></li>
-                <li><a href="temperaturas.html"><i class="fas fa-thermometer-half"></i> Temperaturas</a></li>
-                <li><a href="alertas.html"><i class="fas fa-exclamation-triangle"></i> Alertas</a></li>
-                <li><a href="#"><i class="fas fa-sign-out-alt"></i> Sair</a></li>
-            </ul>
-            
-            <!-- Nova logo adicionada no final do sidebar -->
-            <div class="logo-bottom">
-                <img src="niju.png" alt="Niju Logo" class="bottom-logo">
+            <div class="sidebar-content">
+                <div class="logo-container">
+                    <div class="logo">
+                        <img src="/logo.png" alt="RotaSystem Logo">
+                    </div>
+                    <div class="logo-glow"></div>
+                </div>
+                
+                <ul class="menu">
+                    <li>
+                        <a href="index.html" class="menu-item">
+                            <div class="menu-icon">
+                                <i class="fas fa-home"></i>
+                            </div>
+                            <span class="menu-text">Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="veiculos.html" class="menu-item active">
+                            <div class="menu-icon">
+                                <i class="fas fa-truck"></i>
+                            </div>
+                            <span class="menu-text">Veículos</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="rotas.html" class="menu-item">
+                            <div class="menu-icon">
+                                <i class="fas fa-route"></i>
+                            </div>
+                            <span class="menu-text">Rotas</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="temperaturas.html" class="menu-item">
+                            <div class="menu-icon">
+                                <i class="fas fa-thermometer-half"></i>
+                            </div>
+                            <span class="menu-text">Temperaturas</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="alertas.html" class="menu-item">
+                            <div class="menu-icon">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <span class="menu-text">Alertas</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="menu-item logout-item" id="logoutBtn">
+                            <div class="menu-icon">
+                                <i class="fas fa-sign-out-alt"></i>
+                            </div>
+                            <span class="menu-text">Sair</span>
+                        </a>
+                    </li>
+                    
+                    <!-- Logo da Niju APÓS o botão Sair -->
+                    <li class="niju-menu-item">
+                        <div class="niju-logo-container">
+                            <div class="niju-logo">
+                                <img src="niju.png" alt="Niju Logo">
+                            </div>
+                        </div>
+                    </li>
+                </ul>
             </div>
         </aside>
                 
@@ -40,48 +303,36 @@
                     <h2>Gestão de Veículos</h2>
                 </div>
                 <div class="user-info">
-                    <img src="https://ui-avatars.com/api/?name=Operador&background=2EA7AD&color=fff" alt="User">
-                    <span>Operador</span>
+                    <img src="./rotasystem.png" alt="Rota System Logo" class="company-logo">
+                    <span>Rota System</span>
                 </div>
             </div>
             
-            <!-- Filtros -->
-            <div class="filters">
+            <!-- Filtros Simplificados -->
+            <div class="filters" id="filtersContainer">
                 <div class="filter-header">
                     <div class="filter-title">Filtros e Pesquisa</div>
                 </div>
                 <form id="filterForm" class="filter-form">
-                    <div class="form-group">
-                        <label for="search">Pesquisar</label>
-                        <input type="text" id="search" class="form-control" placeholder="Placa ou motorista...">
+                    <div class="filter-row">
+                        <div class="form-group">
+                            <label for="search">Pesquisar Placa</label>
+                            <input type="text" id="search" class="form-control" placeholder="Digite a placa...">
+                        </div>
+                        <div class="form-group">
+                            <label for="statusFilter">Status da Temperatura</label>
+                            <select id="statusFilter" class="form-control">
+                                <option value="">Todos os status</option>
+                                <option value="normal">Normal (2°C - 5°C)</option>
+                                <option value="alerta">Alerta (5°C - 7°C)</option>
+                                <option value="critico">Crítico (> 7°C)</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="status">Status</label>
-                        <select id="status" class="form-control">
-                            <option value="">Todos</option>
-                            <option value="Normal">Normal</option>
-                            <option value="Atenção">Atenção</option>
-                            <option value="inactive">Inativo</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="temperature">Temperatura</label>
-                        <select id="temperature" class="form-control">
-                            <option value="">Todas</option>
-                            <option value="normal">Normal (2-5°C)</option>
-                            <option value="warning">Atenção (5-7°C)</option>
-                            <option value="critical">Crítico (>7°C)</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="route">Rota</label>
-                        <select id="route" class="form-control">
-                            <option value="">Todas</option>
-                            <option value="Centro - Zona Sul">Centro - Zona Sul</option>
-                            <option value="Zona Norte - Centro">Zona Norte - Centro</option>
-                            <option value="Zona Leste - Centro">Zona Leste - Centro</option>
-                            <option value="Zona Oeste - Centro">Zona Oeste - Centro</option>
-                        </select>
+                    <div class="filter-actions">
+                        <button type="button" class="btn-clear" id="clearFilters">
+                            <i class="fas fa-times"></i> Limpar Filtros
+                        </button>
                     </div>
                 </form>
             </div>
@@ -89,17 +340,8 @@
             <!-- Ações -->
             <div class="actions">
                 <div class="left-actions">
-                    <button class="btn btn-primary" id="addVehicleBtn">
-                        <i class="fas fa-plus"></i> Adicionar Veículo
-                    </button>
                     <button class="btn btn-secondary" id="refreshBtn">
-                        <i class="fas fa-sync-alt"></i> Atualizar
-                    </button>
-                    <button class="btn btn-success" id="exportBtn">
-                        <i class="fas fa-download"></i> Exportar
-                    </button>
-                    <button class="btn btn-danger" id="clearFiltersBtn">
-                        <i class="fas fa-times"></i> Limpar Filtros
+                        <i class="fas fa-sync-alt"></i> <span class="btn-text">Atualizar</span>
                     </button>
                 </div>
             </div>
@@ -108,10 +350,13 @@
             <div class="vehicle-list">
                 <div class="list-header">
                     <div class="list-title">Frota de Veículos</div>
-                    <div id="vehicleCount">Carregando...</div>
+                    <div id="vehicleCount">
+                        <div class="loading-placeholder">Carregando...</div>
+                        <div class="loading-content" style="display: none;">-</div>
+                    </div>
                 </div>
                 
-                <table class="vehicle-table">
+                <table class="vehicle-table table-loading">
                     <thead>
                         <tr>
                             <th>Placa</th>
@@ -124,179 +369,82 @@
                         </tr>
                     </thead>
                     <tbody id="vehicleTableBody">
-                        <!-- Os dados serão carregados via JavaScript -->
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 30px;">
+                                <div class="loading-spinner" style="width: 30px; height: 30px; margin: 0 auto;"></div>
+                                <div style="margin-top: 10px; color: #2EA7AD;">Carregando dados dos veículos...</div>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
                 
                 <!-- Paginação -->
                 <div class="pagination" id="pagination">
-                    <!-- A paginação será gerada via JavaScript -->
+                    <div class="loading-placeholder" style="text-align: center; padding: 15px;">
+                        <div class="loading-spinner" style="width: 20px; height: 20px; margin: 0 auto;"></div>
+                        <span style="margin-left: 10px; color: #2EA7AD;">Carregando paginação...</span>
+                    </div>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Modal de Adicionar Veículo -->
-    <div class="modal" id="addVehicleModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">Adicionar Novo Veículo</h3>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="addVehicleForm" class="modal-form">
-                    <div class="form-group">
-                        <label for="plate">Placa do Veículo *</label>
-                        <input type="text" id="plate" name="plate" class="form-control" placeholder="Ex: VLC-1234" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="model">Modelo *</label>
-                        <input type="text" id="model" name="model" class="form-control" placeholder="Ex: Mercedes Sprinter" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="driver">Motorista *</label>
-                        <input type="text" id="driver" name="driver" class="form-control" placeholder="Nome do motorista" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="modalRoute">Rota *</label>
-                        <select id="modalRoute" name="modalRoute" class="form-control" required>
-                            <option value="">Selecione uma rota</option>
-                            <option value="Centro - Zona Sul">Centro - Zona Sul</option>
-                            <option value="Zona Norte - Centro">Zona Norte - Centro</option>
-                            <option value="Zona Leste - Centro">Zona Leste - Centro</option>
-                            <option value="Zona Oeste - Centro">Zona Oeste - Centro</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="modalStatus">Status *</label>
-                        <select id="modalStatus" name="modalStatus" class="form-control" required>
-                            <option value="Normal">Normal</option>
-                            <option value="Atenção">Atenção</option>
-                            <option value="inactive">Inativo</option>
-                        </select>
-                    </div>
-                    <div class="form-group full-width">
-                        <label for="notes">Observações</label>
-                        <textarea id="notes" name="notes" class="form-control" placeholder="Observações adicionais..." rows="3"></textarea>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" id="cancelAddVehicle">Cancelar</button>
-                <button class="btn btn-primary" id="saveVehicleBtn">Salvar Veículo</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal de Detalhes do Veículo -->
-    <div class="modal" id="vehicleDetailsModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">Detalhes do Veículo</h3>
-                <button class="close-modal close-details">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="vehicle-details">
-                    <!-- Informações do Veículo -->
-                    <div class="detail-card">
-                        <h4>Informações do Veículo</h4>
-                        <div class="detail-item">
-                            <span class="detail-label">Placa:</span>
-                            <span class="detail-value" id="detail-placa">-</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Modelo:</span>
-                            <span class="detail-value" id="detail-modelo">-</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Ano:</span>
-                            <span class="detail-value" id="detail-ano">-</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Capacidade:</span>
-                            <span class="detail-value" id="detail-capacidade">-</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Tipo:</span>
-                            <span class="detail-value" id="detail-tipo">-</span>
-                        </div>
-                    </div>
-                    
-                    <!-- Informações da Operação -->
-                    <div class="detail-card">
-                        <h4>Informações da Operação</h4>
-                        <div class="detail-item">
-                            <span class="detail-label">Motorista:</span>
-                            <span class="detail-value" id="detail-motorista">-</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Rota:</span>
-                            <span class="detail-value" id="detail-rota">-</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Status:</span>
-                            <span class="detail-value" id="detail-status">-</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Temperatura:</span>
-                            <span class="detail-value" id="detail-temperatura">-</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Última Atualização:</span>
-                            <span class="detail-value" id="detail-atualizacao">-</span>
-                        </div>
-                    </div>
-                    
-                    <!-- Manutenção -->
-                    <div class="detail-card">
-                        <h4>Manutenção</h4>
-                        <div class="detail-item">
-                            <span class="detail-label">Última Manutenção:</span>
-                            <span class="detail-value" id="detail-ultima-manutencao">-</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Próxima Manutenção:</span>
-                            <span class="detail-value" id="detail-proxima-manutencao">-</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Quilometragem:</span>
-                            <span class="detail-value" id="detail-km">-</span>
-                        </div>
-                    </div>
-                    
-                    <!-- Contato -->
-                    <div class="detail-card">
-                        <h4>Contato do Motorista</h4>
-                        <div class="detail-item">
-                            <span class="detail-label">Telefone:</span>
-                            <span class="detail-value" id="detail-telefone">-</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">E-mail:</span>
-                            <span class="detail-value" id="detail-email">-</span>
-                        </div>
-                    </div>
-                    
-                    <!-- Gráfico de Temperatura -->
-                    <div class="temperature-chart">
-                        <h4>Variação de Temperatura (Últimas 24h)</h4>
-                        <div class="chart-container">
-                            <canvas id="vehicleDetailChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" id="editVehicleBtn">
-                    <i class="fas fa-pencil-alt"></i> Editar Veículo
-                </button>
-                <button class="btn btn-primary">
-                    <i class="fas fa-print"></i> Imprimir Relatório
-                </button>
-            </div>
-        </div>
-    </div>
-
     <script src="./scripts/veiculos.js"></script>
+    <script>
+        // Sistema de Carregamento - SIMPLIFICADO
+        function showLoading() {
+            const loadingOverlay = document.getElementById('globalLoading');
+            if (loadingOverlay) {
+                loadingOverlay.classList.remove('hidden');
+            }
+        }
+
+        function hideLoading() {
+            const loadingOverlay = document.getElementById('globalLoading');
+            if (loadingOverlay) {
+                loadingOverlay.classList.add('hidden');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const globalLoading = document.getElementById('globalLoading');
+            const refreshBtn = document.getElementById('refreshBtn');
+            const clearFiltersBtn = document.getElementById('clearFilters');
+            
+            // Mostrar loading inicial
+            showLoading();
+            
+            // Esconder loading após carregamento
+            setTimeout(() => {
+                hideLoading();
+            }, 800);
+            
+            // Evento de atualização
+            refreshBtn.addEventListener('click', function() {
+                refreshBtn.classList.add('btn-loading');
+                showLoading();
+                
+                setTimeout(() => {
+                    refreshBtn.classList.remove('btn-loading');
+                    hideLoading();
+                    location.reload();
+                }, 800);
+            });
+            
+            // Evento para limpar filtros
+            clearFiltersBtn.addEventListener('click', function() {
+                document.getElementById('search').value = '';
+                document.getElementById('statusFilter').value = '';
+                applyFilters();
+            });
+            
+            // Evento de logout
+            document.getElementById('logoutBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                localStorage.removeItem('loggedIn');
+                window.location.href = 'index.html';
+            });
+        });
+    </script>
 </body>
 </html>

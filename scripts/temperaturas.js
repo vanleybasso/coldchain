@@ -1,386 +1,617 @@
 // Variáveis globais
-let appData = {};
-let currentTemperatureData = {};
-let temperatureChart = null;
-let statusChart = null;
-let modalHistoryChart = null;
-
-// Dados de exemplo para os sensores
-const sensorData = {
-    1: {
-        sensors: [
-            { name: "Sensor Principal", value: "3.2°C", status: "normal", location: "Centro da carga" },
-            { name: "Sensor da Porta", value: "3.5°C", status: "normal", location: "Perto da porta" },
-            { name: "Sensor do Fundo", value: "2.9°C", status: "normal", location: "Fundo do veículo" },
-            { name: "Sensor do Teto", value: "3.3°C", status: "normal", location: "Teto traseiro" },
-            { name: "Sensor do Piso", value: "3.1°C", status: "normal", location: "Piso dianteiro" },
-            { name: "Sensor Externo", value: "22.5°C", status: "normal", location: "Externo" }
-        ]
-    },
-    2: {
-        sensors: [
-            { name: "Sensor Principal", value: "8.1°C", status: "alert", location: "Centro da carga" },
-            { name: "Sensor da Porta", value: "9.2°C", status: "alert", location: "Perto da porta" },
-            { name: "Sensor do Fundo", value: "7.8°C", status: "alert", location: "Fundo do veículo" },
-            { name: "Sensor do Teto", value: "7.5°C", status: "alert", location: "Teto traseiro" },
-            { name: "Sensor do Piso", value: "8.3°C", status: "alert", location: "Piso dianteiro" },
-            { name: "Sensor Externo", value: "24.7°C", status: "normal", location: "Externo" }
-        ]
-    },
-    3: {
-        sensors: [
-            { name: "Sensor Principal", value: "6.3°C", status: "warning", location: "Centro da carga" },
-            { name: "Sensor da Porta", value: "7.1°C", status: "alert", location: "Perto da porta" },
-            { name: "Sensor do Fundo", value: "5.8°C", status: "warning", location: "Fundo do veículo" },
-            { name: "Sensor do Teto", value: "6.0°C", status: "warning", location: "Teto traseiro" },
-            { name: "Sensor do Piso", value: "6.5°C", status: "alert", location: "Piso dianteiro" },
-            { name: "Sensor Externo", value: "23.2°C", status: "normal", location: "Externo" }
-        ]
-    },
-    4: {
-        sensors: [
-            { name: "Sensor Principal", value: "4.0°C", status: "normal", location: "Centro da carga" },
-            { name: "Sensor da Porta", value: "4.3°C", status: "normal", location: "Perto da porta" },
-            { name: "Sensor do Fundo", value: "3.7°C", status: "normal", location: "Fundo do veículo" },
-            { name: "Sensor do Teto", value: "4.1°C", status: "normal", location: "Teto traseiro" },
-            { name: "Sensor do Piso", value: "3.9°C", status: "normal", location: "Piso dianteiro" },
-            { name: "Sensor Externo", value: "21.8°C", status: "normal", location: "Externo" }
-        ]
-    },
-    5: {
-        sensors: [
-            { name: "Sensor Principal", value: "1.2°C", status: "warning", location: "Centro da carga" },
-            { name: "Sensor da Porta", value: "1.5°C", status: "warning", location: "Perto da porta" },
-            { name: "Sensor do Fundo", value: "0.9°C", status: "alert", location: "Fundo do veículo" },
-            { name: "Sensor do Teto", value: "1.3°C", status: "warning", location: "Teto traseiro" },
-            { name: "Sensor do Piso", value: "1.1°C", status: "warning", location: "Piso dianteiro" },
-            { name: "Sensor Externo", value: "19.5°C", status: "normal", location: "Externo" }
-        ]
-    },
-    6: {
-        sensors: [
-            { name: "Sensor Principal", value: "3.5°C", status: "normal", location: "Centro da carga" },
-            { name: "Sensor da Porta", value: "3.8°C", status: "normal", location: "Perto da porta" },
-            { name: "Sensor do Fundo", value: "3.2°C", status: "normal", location: "Fundo do veículo" },
-            { name: "Sensor do Teto", value: "3.6°C", status: "normal", location: "Teto traseiro" },
-            { name: "Sensor do Piso", value: "3.4°C", status: "normal", location: "Piso dianteiro" },
-            { name: "Sensor Externo", value: "22.8°C", status: "normal", location: "Externo" }
-        ]
-    },
-    7: {
-        sensors: [
-            { name: "Sensor Principal", value: "7.9°C", status: "alert", location: "Centro da carga" },
-            { name: "Sensor da Porta", value: "9.0°C", status: "alert", location: "Perto da porta" },
-            { name: "Sensor do Fundo", value: "7.6°C", status: "alert", location: "Fundo do veículo" },
-            { name: "Sensor do Teto", value: "7.3°C", status: "alert", location: "Teto traseiro" },
-            { name: "Sensor do Piso", value: "8.1°C", status: "alert", location: "Piso dianteiro" },
-            { name: "Sensor Externo", value: "24.5°C", status: "normal", location: "Externo" }
-        ]
-    }
+let sensorData = {};
+let sensorHistoryData = {};
+let currentFilters = {
+    timeRange: '6h',
+    vehicle: 'KG8000003',
+    sensor: 'all'
 };
+let trendChart, distributionChart;
 
-// Dados de exemplo para o modal
-const temperatureData = {
-    1: {
-        temperature: "3.2°C",
-        status: "Normal",
-        range: "2°C a 5°C",
-        variation: "+0.3°C",
-        vehicle: "VLC-1023 - Mercedes Sprinter",
-        driver: "Carlos Silva",
-        plate: "VLC-1023",
-        model: "Mercedes Sprinter",
-        location: "Centro",
-        datetime: "10/09/2023 14:25",
-        speed: "45 km/h",
-        updated: "2 minutos atrás"
-    },
-    2: {
-        temperature: "8.1°C",
-        status: "Crítico",
-        range: "2°C a 5°C",
-        variation: "+1.2°C",
-        vehicle: "VLC-2087 - Volkswagen Delivery",
-        driver: "Ana Santos",
-        plate: "VLC-2087",
-        model: "Volkswagen Delivery",
-        location: "Zona Norte",
-        datetime: "10/09/2023 14:20",
-        speed: "32 km/h",
-        updated: "7 minutos atrás"
-    },
-    3: {
-        temperature: "6.3°C",
-        status: "Atenção",
-        range: "2°C a 5°C",
-        variation: "+0.8°C",
-        vehicle: "VLC-3054 - Ford Transit",
-        driver: "Roberto Alves",
-        plate: "VLC-3054",
-        model: "Ford Transit",
-        location: "Zona Oeste",
-        datetime: "10/09/2023 14:18",
-        speed: "38 km/h",
-        updated: "9 minutos atrás"
-    },
-    4: {
-        temperature: "4.0°C",
-        status: "Normal",
-        range: "2°C a 5°C",
-        variation: "-0.2°C",
-        vehicle: "VLC-4098 - Fiat Ducato",
-        driver: "Maria Oliveira",
-        plate: "VLC-4098",
-        model: "Fiat Ducato",
-        location: "Zona Leste",
-        datetime: "10/09/2023 14:15",
-        speed: "50 km/h",
-        updated: "12 minutos atrás"
-    },
-    5: {
-        temperature: "1.2°C",
-        status: "Atenção",
-        range: "2°C a 5°C",
-        variation: "-0.5°C",
-        vehicle: "VLC-5021 - Renault Master",
-        driver: "João Costa",
-        plate: "VLC-5021",
-        model: "Renault Master",
-        location: "Aeroporto",
-        datetime: "10/09/2023 14:10",
-        speed: "55 km/h",
-        updated: "17 minutos atrás"
-    },
-    6: {
-        temperature: "3.5°C",
-        status: "Normal",
-        range: "2°C a 5°C",
-        variation: "+0.1°C",
-        vehicle: "VLC-1023 - Mercedes Sprinter",
-        driver: "Carlos Silva",
-        plate: "VLC-1023",
-        model: "Mercedes Sprinter",
-        location: "Centro",
-        datetime: "10/09/2023 14:05",
-        speed: "42 km/h",
-        updated: "22 minutos atrás"
-    },
-    7: {
-        temperature: "7.9°C",
-        status: "Crítico",
-        range: "2°C a 5°C",
-        variation: "+0.9°C",
-        vehicle: "VLC-2087 - Volkswagen Delivery",
-        driver: "Ana Santos",
-        plate: "VLC-2087",
-        model: "Volkswagen Delivery",
-        location: "Zona Norte",
-        datetime: "10/09/2023 14:00",
-        speed: "28 km/h",
-        updated: "27 minutos atrás"
+// Sistema de Loading
+function showLoading() {
+    const loadingOverlay = document.getElementById('globalLoading');
+    if (loadingOverlay) {
+        loadingOverlay.classList.remove('hidden');
     }
-};
+}
+
+function hideLoading() {
+    const loadingOverlay = document.getElementById('globalLoading');
+    if (loadingOverlay) {
+        loadingOverlay.classList.add('hidden');
+    }
+}
 
 // Inicialização da aplicação
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM carregado, iniciando aplicação de temperaturas...');
-    initializeApp();
+document.addEventListener('DOMContentLoaded', async function() {
+    console.log('Inicializando página de temperaturas...');
+    
+    showLoading();
+    
+    try {
+        // Carregar dados
+        await loadSensorData();
+        await loadSensorHistoryForPeriod(currentFilters.timeRange);
+        
+        // Inicializar componentes
+        initializeFilters();
+        updateMetrics();
+        createCharts();
+        
+        // Configurar event listeners
+        setupEventListeners();
+        
+        hideLoading();
+        
+    } catch (error) {
+        console.error('Erro na inicialização:', error);
+        hideLoading();
+    }
 });
 
-// Função para inicializar a aplicação
-function initializeApp() {
-    console.log('Inicializando aplicação de temperaturas...');
-    setupEventListeners();
-    populateTemperatureTable();
-    initializeCharts();
-    startRealTimeUpdates();
-}
-
-// Configurar event listeners
-function setupEventListeners() {
-    console.log('Configurando event listeners...');
-    
-    // Botões
-    const clearFiltersBtn = document.getElementById('clearFiltersBtn');
-    const exportChartBtn = document.getElementById('exportChartBtn');
-    const filterChartBtn = document.getElementById('filterChartBtn');
-    const exportReportBtn = document.getElementById('exportReportBtn');
-    
-    // Event listeners para botões
-    clearFiltersBtn.addEventListener('click', clearFilters);
-    exportChartBtn.addEventListener('click', exportChart);
-    filterChartBtn.addEventListener('click', filterChart);
-    exportReportBtn.addEventListener('click', exportReport);
-    
-    // Filtros em tempo real
-    const filterForm = document.getElementById('filterForm');
-    filterForm.addEventListener('input', applyFilters);
-    
-    // Modal functionality
-    const modal = document.getElementById('detailsModal');
-    const closeModalBtn = document.querySelector('.modal-close');
-    const closeModalBtn2 = document.getElementById('modal-close-btn');
-    const actionBtn = document.getElementById('modal-action-btn');
-    
-    // Adiciona eventos para fechar o modal
-    closeModalBtn.addEventListener('click', closeModal);
-    closeModalBtn2.addEventListener('click', closeModal);
-    actionBtn.addEventListener('click', generateIncidentReport);
-    
-    // Fecha o modal ao clicar fora dele
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            closeModal();
+// Carregar dados dos sensores
+async function loadSensorData() {
+    try {
+        console.log('Carregando dados dos sensores...');
+        const response = await fetch('./sensor_data.json');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
-    });
-    
-    // Fecha o modal com a tecla ESC
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && modal.classList.contains('active')) {
-            closeModal();
-        }
-    });
-}
-
-// Inicializar gráficos
-function initializeCharts() {
-    // Verificar se Chart.js está disponível
-    if (typeof Chart === 'undefined') {
-        console.error('Chart.js não está disponível');
-        return;
+        
+        const data = await response.json();
+        console.log('Dados dos sensores carregados:', data);
+        sensorData = data;
+        
+    } catch (error) {
+        console.error('Erro ao carregar dados dos sensores:', error);
+        throw error;
     }
-    
-    // Gráfico de variação de temperatura por hora
-    const tempCtx = document.getElementById('temperatureChart');
-    if (tempCtx) {
-        const tempCtx2d = tempCtx.getContext('2d');
+}
+
+// Carregar histórico dos sensores baseado no período
+async function loadSensorHistoryForPeriod(timeRange) {
+    try {
+        console.log(`Carregando histórico para período: ${timeRange}`);
+        const response = await fetch(`./sensor_history_${timeRange}.json`);
         
-        // Dados de exemplo para o gráfico de temperatura
-        const hours = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00'];
-        const temperatures = [3.1, 3.3, 3.5, 3.8, 4.2, 3.9, 3.4];
-        
-        // Destruir gráfico anterior se existir
-        if (temperatureChart) {
-            temperatureChart.destroy();
+        if (!response.ok) {
+            console.log(`Arquivo para período ${timeRange} não encontrado, usando padrão...`);
+            await loadDefaultSensorHistory();
+            return;
         }
         
-        temperatureChart = new Chart(tempCtx2d, {
-            type: 'line',
-            data: {
-                labels: hours,
-                datasets: [{
-                    label: 'Temperatura Média (°C)',
-                    data: temperatures,
-                    borderColor: '#2EA7AD',
-                    backgroundColor: 'rgba(46, 167, 173, 0.1)',
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.4,
-                    pointBackgroundColor: '#2EA7AD',
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
-                    pointRadius: 4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top',
-                    },
-                    tooltip: {
-                        mode: 'index',
-                        intersect: false
+        const data = await response.json();
+        console.log(`Histórico do período ${timeRange} carregado:`, data);
+        sensorHistoryData = data;
+        
+    } catch (error) {
+        console.error(`Erro ao carregar histórico do período ${timeRange}:`, error);
+        await loadDefaultSensorHistory();
+    }
+}
+
+// Carregar histórico padrão (6h) como fallback
+async function loadDefaultSensorHistory() {
+    try {
+        console.log('Carregando histórico padrão...');
+        const response = await fetch('./sensor_history.json');
+        if (response.ok) {
+            const data = await response.json();
+            sensorHistoryData = data;
+            console.log('Histórico padrão carregado com sucesso');
+        } else {
+            console.log('Arquivo de histórico padrão não encontrado');
+            sensorHistoryData = {};
+        }
+    } catch (error) {
+        console.error('Erro ao carregar histórico padrão:', error);
+        sensorHistoryData = {};
+    }
+}
+
+// Inicializar filtros
+function initializeFilters() {
+    const timeRangeSelect = document.getElementById('timeRange');
+    const vehicleFilter = document.getElementById('vehicleFilter');
+    const sensorFilter = document.getElementById('sensorFilter');
+    const applyFiltersBtn = document.getElementById('applyFilters');
+    
+    timeRangeSelect.value = currentFilters.timeRange;
+    vehicleFilter.value = currentFilters.vehicle;
+    sensorFilter.value = currentFilters.sensor;
+    
+    applyFiltersBtn.addEventListener('click', applyFilters);
+}
+
+// Aplicar filtros
+async function applyFilters() {
+    const timeRangeSelect = document.getElementById('timeRange');
+    const vehicleFilter = document.getElementById('vehicleFilter');
+    const sensorFilter = document.getElementById('sensorFilter');
+    
+    currentFilters = {
+        timeRange: timeRangeSelect.value,
+        vehicle: vehicleFilter.value,
+        sensor: sensorFilter.value
+    };
+    
+    console.log('Aplicando filtros:', currentFilters);
+    
+    showLoading();
+    
+    try {
+        await loadSensorHistoryForPeriod(currentFilters.timeRange);
+        updateMetrics();
+        updateCharts();
+        hideLoading();
+        
+    } catch (error) {
+        console.error('Erro ao aplicar filtros:', error);
+        hideLoading();
+    }
+}
+
+// Atualizar métricas - COM TEMPERATURA MÍNIMA MÉDIA
+function updateMetrics() {
+    const metrics = calculateTemperatureMetricsFromHistory();
+    
+    // Atualizar cards
+    document.getElementById('avg-temp').textContent = `${metrics.average}°C`;
+    document.getElementById('max-temp').textContent = `${metrics.maximum}°C`;
+    document.getElementById('min-temp').textContent = `${metrics.minimumAvg}°C`; // Mínima média
+    
+    updateMetricPeriods();
+    updateTrendIndicators();
+}
+
+// Calcular métricas de temperatura baseadas no HISTÓRICO
+function calculateTemperatureMetricsFromHistory() {
+    let allTemperatures = [];
+    let sensorMinTemperatures = {}; // Para calcular mínima média
+    
+    // Coletar temperaturas do histórico baseadas nos filtros
+    if (currentFilters.sensor === 'all') {
+        // Todos os sensores internos
+        const internalSensors = ['principal', 'meio', 'porta', 'fundo', 'piso', 'teto'];
+        
+        internalSensors.forEach(sensorName => {
+            if (sensorHistoryData[sensorName] && sensorHistoryData[sensorName].length > 0) {
+                // Coletar todas as temperaturas para média e máxima
+                sensorHistoryData[sensorName].forEach(entry => {
+                    if (entry.temperature !== 0.0) {
+                        allTemperatures.push(entry.temperature);
                     }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: false,
-                        title: {
-                            display: true,
-                            text: 'Temperatura (°C)'
-                        },
-                        min: 0,
-                        max: 10,
-                        ticks: {
-                            stepSize: 2
-                        }
-                    }
+                });
+                
+                // Calcular mínima de cada sensor
+                const sensorTemps = sensorHistoryData[sensorName]
+                    .filter(entry => entry.temperature !== 0.0)
+                    .map(entry => entry.temperature);
+                
+                if (sensorTemps.length > 0) {
+                    const sensorMin = Math.min(...sensorTemps);
+                    sensorMinTemperatures[sensorName] = sensorMin;
                 }
             }
         });
+    } else {
+        // Sensor específico
+        if (sensorHistoryData[currentFilters.sensor]) {
+            sensorHistoryData[currentFilters.sensor].forEach(entry => {
+                if (entry.temperature !== 0.0) {
+                    allTemperatures.push(entry.temperature);
+                }
+            });
+            
+            // Para sensor único, mínima média é a mesma que mínima
+            const sensorTemps = sensorHistoryData[currentFilters.sensor]
+                .filter(entry => entry.temperature !== 0.0)
+                .map(entry => entry.temperature);
+            
+            if (sensorTemps.length > 0) {
+                const sensorMin = Math.min(...sensorTemps);
+                sensorMinTemperatures[currentFilters.sensor] = sensorMin;
+            }
+        }
     }
     
-    // Gráfico de distribuição de status
-    const statusCtx = document.getElementById('statusChart');
-    if (statusCtx) {
-        const statusCtx2d = statusCtx.getContext('2d');
+    // Calcular métricas
+    let average = '--';
+    let maximum = '--';
+    let minimumAvg = '--'; // Mínima média
+    
+    if (allTemperatures.length > 0) {
+        // Média geral
+        const sum = allTemperatures.reduce((a, b) => a + b, 0);
+        average = (sum / allTemperatures.length).toFixed(1);
         
-        // Destruir gráfico anterior se existir
-        if (statusChart) {
-            statusChart.destroy();
+        // Máxima geral
+        maximum = Math.max(...allTemperatures).toFixed(1);
+        
+        // Mínima média (média das mínimas de cada sensor)
+        const minTemps = Object.values(sensorMinTemperatures);
+        if (minTemps.length > 0) {
+            const minSum = minTemps.reduce((a, b) => a + b, 0);
+            minimumAvg = (minSum / minTemps.length).toFixed(1);
+        } else {
+            // Se não conseguiu calcular mínima média, usa a mínima geral
+            minimumAvg = Math.min(...allTemperatures).toFixed(1);
         }
         
-        statusChart = new Chart(statusCtx2d, {
-            type: 'doughnut',
-            data: {
-                labels: ['Normal', 'Atenção', 'Crítico'],
-                datasets: [{
-                    data: [15, 3, 2],
-                    backgroundColor: [
-                        '#2EAD61',
-                        '#ECDD13',
-                        '#EC2513'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
-                    }
-                }
-            }
-        });
+        console.log(`Métricas calculadas - Média: ${average}°C, Máxima: ${maximum}°C, Mínima Média: ${minimumAvg}°C`);
+        console.log(`Leituras: ${allTemperatures.length}, Sensores com mínima: ${Object.keys(sensorMinTemperatures).length}`);
+    } else {
+        console.log('Nenhum dado histórico encontrado para calcular métricas');
+    }
+    
+    return {
+        average,
+        maximum,
+        minimumAvg
+    };
+}
+
+// Atualizar períodos nos cards
+function updateMetricPeriods() {
+    const periodText = getPeriodDisplayText(currentFilters.timeRange);
+    const periodElements = document.querySelectorAll('.metric-period');
+    
+    periodElements.forEach(element => {
+        element.textContent = periodText;
+    });
+}
+
+// Obter texto de exibição do período
+function getPeriodDisplayText(timeRange) {
+    const periods = {
+        '1h': 'Última hora',
+        '6h': 'Últimas 6 horas',
+        '12h': 'Últimas 12 horas',
+        '24h': 'Últimas 24 horas'
+    };
+    return periods[timeRange] || 'Últimas 6 horas';
+}
+
+// Atualizar indicadores de tendência
+function updateTrendIndicators() {
+    const historicalData = getHistoricalDataForMetrics();
+    const trends = calculateTrends(historicalData);
+    
+    updateTrendElement('avg-temp-trend', trends.avg);
+    updateTrendElement('max-temp-trend', trends.max);
+    updateTrendElement('min-temp-trend', trends.min);
+}
+
+function updateTrendElement(elementId, trend) {
+    const element = document.getElementById(elementId);
+    if (trend.value !== '--') {
+        element.innerHTML = trend.direction === 'positive' 
+            ? `<i class="fas fa-arrow-up"></i> ${trend.value}`
+            : `<i class="fas fa-arrow-down"></i> ${trend.value}`;
+        element.className = `metric-trend ${trend.direction}`;
+    } else {
+        element.innerHTML = '<i class="fas fa-minus"></i> --';
+        element.className = 'metric-trend';
     }
 }
 
-// Criar gráfico de histórico no modal
-function createModalHistoryChart(vehicleId) {
-    const ctx = document.getElementById('modalHistoryChart');
+// Obter dados históricos para cálculo de tendências
+function getHistoricalDataForMetrics() {
+    let allTemperatures = [];
+    
+    if (currentFilters.sensor === 'all') {
+        const internalSensors = ['principal', 'meio', 'porta', 'fundo', 'piso', 'teto'];
+        internalSensors.forEach(sensorName => {
+            if (sensorHistoryData[sensorName]) {
+                sensorHistoryData[sensorName].forEach(entry => {
+                    if (entry.temperature !== 0.0) {
+                        const entryTime = new Date(entry.timestamp);
+                        allTemperatures.push({
+                            temperature: entry.temperature,
+                            timestamp: entryTime
+                        });
+                    }
+                });
+            }
+        });
+    } else {
+        if (sensorHistoryData[currentFilters.sensor]) {
+            sensorHistoryData[currentFilters.sensor].forEach(entry => {
+                if (entry.temperature !== 0.0) {
+                    const entryTime = new Date(entry.timestamp);
+                    allTemperatures.push({
+                        temperature: entry.temperature,
+                        timestamp: entryTime
+                    });
+                }
+            });
+        }
+    }
+    
+    return allTemperatures;
+}
+
+// Calcular tendências
+function calculateTrends(historicalData) {
+    if (historicalData.length < 2) {
+        return {
+            avg: { value: '--', direction: 'neutral' },
+            max: { value: '--', direction: 'neutral' },
+            min: { value: '--', direction: 'neutral' }
+        };
+    }
+    
+    // Ordenar por timestamp
+    historicalData.sort((a, b) => a.timestamp - b.timestamp);
+    
+    const midIndex = Math.floor(historicalData.length / 2);
+    const oldData = historicalData.slice(0, midIndex);
+    const newData = historicalData.slice(midIndex);
+    
+    const oldAvg = oldData.reduce((sum, entry) => sum + entry.temperature, 0) / oldData.length;
+    const newAvg = newData.reduce((sum, entry) => sum + entry.temperature, 0) / newData.length;
+    
+    const oldMax = Math.max(...oldData.map(entry => entry.temperature));
+    const newMax = Math.max(...newData.map(entry => entry.temperature));
+    const oldMin = Math.min(...oldData.map(entry => entry.temperature));
+    const newMin = Math.min(...newData.map(entry => entry.temperature));
+    
+    const avgDiff = (newAvg - oldAvg).toFixed(1);
+    const maxDiff = (newMax - oldMax).toFixed(1);
+    const minDiff = (newMin - oldMin).toFixed(1);
+    
+    return {
+        avg: { 
+            value: `${Math.abs(avgDiff)}°C`, 
+            direction: avgDiff >= 0 ? 'positive' : 'negative' 
+        },
+        max: { 
+            value: `${Math.abs(maxDiff)}°C`, 
+            direction: maxDiff >= 0 ? 'positive' : 'negative' 
+        },
+        min: { 
+            value: `${Math.abs(minDiff)}°C`, 
+            direction: minDiff >= 0 ? 'positive' : 'negative' 
+        }
+    };
+}
+
+// Criar gráficos
+function createCharts() {
+    createTrendChart();
+    createDistributionChart();
+}
+
+// Gráfico de tendência com dados reais
+function createTrendChart() {
+    const ctx = document.getElementById('trendChart');
     if (!ctx) return;
     
-    // Destruir gráfico anterior se existir
-    if (modalHistoryChart) {
-        modalHistoryChart.destroy();
+    const chartData = getRealChartData();
+    
+    if (trendChart) {
+        trendChart.destroy();
     }
     
-    const ctx2d = ctx.getContext('2d');
-    
-    // Gerar dados de histórico para as últimas 2 horas
-    const historyData = generateHistoryData(vehicleId);
-    
-    modalHistoryChart = new Chart(ctx2d, {
+    trendChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: historyData.times,
-            datasets: [{
-                label: 'Temperatura (°C)',
-                data: historyData.temperatures,
-                borderColor: '#2EA7AD',
-                backgroundColor: 'rgba(46, 167, 173, 0.1)',
+            labels: chartData.labels,
+            datasets: chartData.datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                }
+            },
+            scales: {
+                x: {
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)',
+                    },
+                    ticks: {
+                        maxRotation: 45,
+                    }
+                },
+                y: {
+                    beginAtZero: false,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Temperatura (°C)'
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Obter dados reais para o gráfico baseado nos filtros
+function getRealChartData() {
+    if (currentFilters.sensor === 'all') {
+        // Gráfico com todos os sensores internos
+        return getAllSensorsChartData();
+    } else {
+        // Gráfico com sensor específico
+        return getSingleSensorChartData(currentFilters.sensor);
+    }
+}
+
+// Dados do gráfico para todos os sensores
+function getAllSensorsChartData() {
+    const internalSensors = ['principal', 'meio', 'porta', 'fundo', 'piso', 'teto'];
+    const datasets = [];
+    const timeLabels = [];
+    
+    // Cores para os sensores
+    const sensorColors = {
+        'principal': '#2EA7AD',
+        'meio': '#45B7D1',
+        'porta': '#FFA07A',
+        'fundo': '#98D8C8',
+        'piso': '#F7DC6F',
+        'teto': '#BB8FCE'
+    };
+    
+    // Obter labels de tempo do primeiro sensor que tenha dados
+    let hasData = false;
+    for (const sensorName of internalSensors) {
+        if (sensorHistoryData[sensorName] && sensorHistoryData[sensorName].length > 0) {
+            timeLabels.push(...sensorHistoryData[sensorName].map(entry => 
+                formatTimestampForChart(entry.timestamp, currentFilters.timeRange)
+            ));
+            hasData = true;
+            break;
+        }
+    }
+    
+    // Criar datasets para cada sensor
+    internalSensors.forEach(sensorName => {
+        if (sensorHistoryData[sensorName] && sensorHistoryData[sensorName].length > 0) {
+            const data = sensorHistoryData[sensorName].map(entry => entry.temperature);
+            
+            datasets.push({
+                label: getSensorDisplayName(sensorName),
+                data: data,
+                borderColor: sensorColors[sensorName] || '#2EA7AD',
+                backgroundColor: 'transparent',
                 borderWidth: 2,
-                fill: true,
+                fill: false,
                 tension: 0.4,
-                pointBackgroundColor: historyData.colors,
+                pointBackgroundColor: sensorColors[sensorName] || '#2EA7AD',
                 pointBorderColor: '#fff',
                 pointBorderWidth: 2,
-                pointRadius: 3
+                pointRadius: 2,
+                pointHoverRadius: 4
+            });
+        }
+    });
+    
+    // Se não há dados, usar dados simulados
+    if (!hasData) {
+        return getFallbackChartData();
+    }
+    
+    return {
+        labels: timeLabels,
+        datasets: datasets
+    };
+}
+
+// Dados do gráfico para sensor único
+function getSingleSensorChartData(sensorName) {
+    let timeLabels = [];
+    let temperatureData = [];
+    
+    if (sensorHistoryData[sensorName] && sensorHistoryData[sensorName].length > 0) {
+        timeLabels = sensorHistoryData[sensorName].map(entry => 
+            formatTimestampForChart(entry.timestamp, currentFilters.timeRange)
+        );
+        temperatureData = sensorHistoryData[sensorName].map(entry => entry.temperature);
+    }
+    
+    // Se não há dados, usar dados simulados
+    if (timeLabels.length === 0) {
+        return getFallbackChartData();
+    }
+    
+    return {
+        labels: timeLabels,
+        datasets: [{
+            label: getSensorDisplayName(sensorName),
+            data: temperatureData,
+            borderColor: '#2EA7AD',
+            backgroundColor: 'rgba(46, 167, 173, 0.1)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: '#2EA7AD',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 3,
+            pointHoverRadius: 5
+        }]
+    };
+}
+
+// Formatar timestamp para o gráfico baseado no período
+function formatTimestampForChart(timestamp, timeRange) {
+    const date = new Date(timestamp);
+    
+    switch(timeRange) {
+        case '1h':
+        case '6h':
+        case '12h':
+        case '24h':
+            return date.toLocaleTimeString('pt-BR', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+        default:
+            return date.toLocaleTimeString('pt-BR', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+    }
+}
+
+// Dados de fallback para gráfico
+function getFallbackChartData() {
+    const timeData = getTimeDataForRange(currentFilters.timeRange);
+    const temperatureData = getTemperatureDataForRange(currentFilters.timeRange);
+    
+    return {
+        labels: timeData,
+        datasets: [{
+            label: 'Temperatura Média',
+            data: temperatureData,
+            borderColor: '#2EA7AD',
+            backgroundColor: 'rgba(46, 167, 173, 0.1)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: '#2EA7AD',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 3,
+            pointHoverRadius: 5
+        }]
+    };
+}
+
+// Gráfico de distribuição por sensor
+function createDistributionChart() {
+    const ctx = document.getElementById('sensorDistributionChart');
+    if (!ctx) return;
+    
+    const sensorData = getCurrentSensorTemperatures();
+    
+    if (distributionChart) {
+        distributionChart.destroy();
+    }
+    
+    distributionChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: sensorData.labels,
+            datasets: [{
+                label: 'Temperatura Atual (°C)',
+                data: sensorData.temperatures,
+                backgroundColor: sensorData.colors,
+                borderColor: sensorData.borderColors,
+                borderWidth: 1
             }]
         },
         options: {
@@ -392,17 +623,11 @@ function createModalHistoryChart(vehicleId) {
                 }
             },
             scales: {
-                x: {
-                    grid: {
-                        display: false
-                    }
-                },
                 y: {
-                    beginAtZero: false,
-                    min: -2,
-                    max: 12,
-                    ticks: {
-                        stepSize: 2
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Temperatura (°C)'
                     }
                 }
             }
@@ -410,313 +635,187 @@ function createModalHistoryChart(vehicleId) {
     });
 }
 
-// Gerar dados de histórico para o modal
-function generateHistoryData(vehicleId) {
-    const times = [];
+// Obter temperaturas atuais dos sensores
+function getCurrentSensorTemperatures() {
+    const sensors = ['principal', 'meio', 'porta', 'fundo', 'piso', 'teto', 'externo'];
+    const labels = [];
     const temperatures = [];
     const colors = [];
+    const borderColors = [];
     
-    // Gerar 12 pontos de dados (um a cada 10 minutos)
-    for (let i = 11; i >= 0; i--) {
-        const time = new Date();
-        time.setMinutes(time.getMinutes() - (i * 10));
-        
-        // Formatar hora
-        const timeString = time.toLocaleTimeString('pt-BR', { 
-            hour: '2-digit', 
-            minute: '2-digit' 
-        });
-        
-        // Gerar temperatura com variação realista
-        const baseTemp = parseFloat(temperatureData[vehicleId].temperature);
-        const variation = (Math.random() - 0.5) * 1.5;
-        const temp = Math.max(-2, Math.min(12, baseTemp + variation));
-        
-        // Determinar cor baseada na temperatura
-        let color = '#2EAD61'; // Verde para normal
-        if (temp > 7) color = '#EC2513'; // Vermelho para crítico
-        else if (temp > 5) color = '#ECDD13'; // Amarelo para atenção
-        
-        times.push(timeString);
-        temperatures.push(parseFloat(temp.toFixed(1)));
-        colors.push(color);
-    }
+    // Cores baseadas no status
+    const statusColors = {
+        'normal': 'rgba(46, 167, 173, 0.7)',
+        'warning': 'rgba(255, 193, 7, 0.7)',
+        'critical': 'rgba(220, 53, 69, 0.7)'
+    };
     
-    return { times, temperatures, colors };
-}
-
-// Popular a tabela de temperaturas
-function populateTemperatureTable() {
-    const tableBody = document.getElementById('temperatureTableBody');
-    tableBody.innerHTML = '';
+    const statusBorderColors = {
+        'normal': '#2EA7AD',
+        'warning': '#FFC107',
+        'critical': '#DC3545'
+    };
     
-    const tableData = [
-        { id: 1, datetime: "10/09/2023 14:25", vehicle: "VLC-1023", driver: "Carlos Silva", temp: "3.2°C", status: "normal", location: "Centro" },
-        { id: 2, datetime: "10/09/2023 14:20", vehicle: "VLC-2087", driver: "Ana Santos", temp: "8.1°C", status: "alert", location: "Zona Norte" },
-        { id: 3, datetime: "10/09/2023 14:18", vehicle: "VLC-3054", driver: "Roberto Alves", temp: "6.3°C", status: "warning", location: "Zona Oeste" },
-        { id: 4, datetime: "10/09/2023 14:15", vehicle: "VLC-4098", driver: "Maria Oliveira", temp: "4.0°C", status: "normal", location: "Zona Leste" },
-        { id: 5, datetime: "10/09/2023 14:10", vehicle: "VLC-5021", driver: "João Costa", temp: "1.2°C", status: "warning", location: "Aeroporto" },
-        { id: 6, datetime: "10/09/2023 14:05", vehicle: "VLC-1023", driver: "Carlos Silva", temp: "3.5°C", status: "normal", location: "Centro" },
-        { id: 7, datetime: "10/09/2023 14:00", vehicle: "VLC-2087", driver: "Ana Santos", temp: "7.9°C", status: "alert", location: "Zona Norte" }
-    ];
-    
-    tableData.forEach(row => {
-        const tr = document.createElement('tr');
-        tr.setAttribute('data-id', row.id);
-        
-        tr.innerHTML = `
-            <td>${row.datetime}</td>
-            <td>${row.vehicle}</td>
-            <td>${row.driver}</td>
-            <td>
-                <div class="multi-sensor">
-                    <span class="temp-indicator temp-${row.status}"></span> ${row.temp}
-                    <span class="sensor-badge">6 sensores</span>
-                    <div class="sensor-tooltip">
-                        <div class="sensor-tooltip-title">Todos os Sensores</div>
-                        ${generateSensorTooltip(row.id)}
-                    </div>
-                </div>
-            </td>
-            <td><span class="status ${row.status}">${getStatusText(row.status)}</span></td>
-            <td>${row.location}</td>
-        `;
-        
-        tableBody.appendChild(tr);
+    sensors.forEach(sensorName => {
+        const sensor = sensorData[sensorName];
+        if (sensor && sensor.temperature !== 0.0) {
+            labels.push(getSensorDisplayName(sensorName));
+            temperatures.push(sensor.temperature);
+            
+            // Determinar status (sensor externo sempre normal)
+            let status = 'normal';
+            if (sensorName !== 'externo') {
+                const temp = sensor.temperature;
+                if (temp > 7) {
+                    status = 'critical';
+                } else if (temp > 5) {
+                    status = 'warning';
+                }
+            }
+            
+            colors.push(statusColors[status]);
+            borderColors.push(statusBorderColors[status]);
+        }
     });
     
-    // Adiciona eventos de clique nas linhas da tabela
-    const tableRows = document.querySelectorAll('.history-table tbody tr');
-    tableRows.forEach(row => {
-        row.addEventListener('click', () => {
-            const id = row.getAttribute('data-id');
-            openModal(id);
-        });
-    });
+    return { labels, temperatures, colors, borderColors };
 }
 
-// Gerar tooltip de sensores
-function generateSensorTooltip(id) {
-    const sensors = sensorData[id].sensors;
-    return sensors.map(sensor => `
-        <div class="sensor-item">
-            <span class="sensor-name">${sensor.name}:</span>
-            <span class="sensor-value">${sensor.value}</span>
-        </div>
-    `).join('');
+// Funções auxiliares
+function getSensorDisplayName(sensorName) {
+    const names = {
+        'externo': 'Sensor Externo',
+        'principal': 'Sensor Principal',
+        'meio': 'Sensor do Meio',
+        'porta': 'Sensor da Porta',
+        'fundo': 'Sensor do Fundo',
+        'piso': 'Sensor do Piso',
+        'teto': 'Sensor do Teto'
+    };
+    return names[sensorName] || sensorName;
 }
 
-// Obter texto do status
-function getStatusText(status) {
-    switch(status) {
-        case 'normal': return 'Normal';
-        case 'warning': return 'Atenção';
-        case 'alert': return 'Crítico';
-        default: return 'Desconhecido';
-    }
+function getHoursFromFilter(timeRange) {
+    const ranges = {
+        '1h': 1,
+        '6h': 6,
+        '12h': 12,
+        '24h': 24
+    };
+    return ranges[timeRange] || 6;
 }
 
-// Função para renderizar os sensores no modal
-function renderSensors(id) {
-    const sensorsContainer = document.getElementById('sensors-container');
-    sensorsContainer.innerHTML = '';
+// Funções auxiliares para dados de fallback
+function getTimeDataForRange(range) {
+    const now = new Date();
+    let labels = [];
     
-    const sensors = sensorData[id].sensors;
-    
-    sensors.forEach(sensor => {
-        const sensorCard = document.createElement('div');
-        sensorCard.className = `sensor-card ${sensor.status}`;
-        
-        sensorCard.innerHTML = `
-            <div class="sensor-card-header">
-                <div class="sensor-card-title">${sensor.name}</div>
-                <span class="status ${sensor.status}">${getStatusText(sensor.status)}</span>
-            </div>
-            <div class="sensor-card-value">${sensor.value}</div>
-            <div class="sensor-card-location">${sensor.location}</div>
-        `;
-        
-        sensorsContainer.appendChild(sensorCard);
-    });
-}
-
-// Função para abrir o modal com os dados
-function openModal(id) {
-    const data = temperatureData[id];
-    
-    // Atualiza os elementos do modal com os dados
-    document.getElementById('modal-temp').textContent = data.temperature;
-    document.getElementById('modal-status').textContent = data.status;
-    document.getElementById('modal-range').textContent = data.range;
-    document.getElementById('modal-variation').textContent = data.variation;
-    document.getElementById('modal-vehicle').textContent = data.vehicle;
-    document.getElementById('modal-driver').textContent = data.driver;
-    document.getElementById('modal-plate').textContent = data.plate;
-    document.getElementById('modal-model').textContent = data.model;
-    document.getElementById('modal-location').textContent = data.location;
-    document.getElementById('modal-datetime').textContent = data.datetime;
-    document.getElementById('modal-speed').textContent = data.speed;
-    document.getElementById('modal-updated').textContent = data.updated;
-    
-    // Ajusta as classes de status
-    const tempValue = document.getElementById('modal-temp');
-    const statusValue = document.getElementById('modal-status');
-    const variationValue = document.getElementById('modal-variation');
-    
-    // Remove classes anteriores
-    tempValue.className = 'detail-card-value';
-    statusValue.className = 'detail-card-value';
-    variationValue.className = 'detail-card-value';
-    
-    // Adiciona a classe apropriada baseada no status
-    if (data.status === 'Normal') {
-        tempValue.classList.add('normal');
-        statusValue.classList.add('normal');
-        variationValue.classList.add('normal');
-    } else if (data.status === 'Atenção') {
-        tempValue.classList.add('warning');
-        statusValue.classList.add('warning');
-        variationValue.classList.add('warning');
-    } else {
-        tempValue.classList.add('critical');
-        statusValue.classList.add('critical');
-        variationValue.classList.add('critical');
+    switch(range) {
+        case '1h':
+            for (let i = 0; i < 12; i++) {
+                const time = new Date(now.getTime() - (55 - i * 5) * 60000);
+                labels.push(time.toLocaleTimeString('pt-BR', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                }));
+            }
+            break;
+        case '6h':
+            for (let i = 0; i < 12; i++) {
+                const time = new Date(now.getTime() - (330 - i * 30) * 60000);
+                labels.push(time.toLocaleTimeString('pt-BR', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                }));
+            }
+            break;
+        case '12h':
+            for (let i = 0; i < 12; i++) {
+                const time = new Date(now.getTime() - (660 - i * 60) * 60000);
+                labels.push(time.toLocaleTimeString('pt-BR', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                }));
+            }
+            break;
+        case '24h':
+            for (let i = 0; i < 12; i++) {
+                const time = new Date(now.getTime() - (1380 - i * 120) * 60000);
+                labels.push(time.toLocaleTimeString('pt-BR', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                }));
+            }
+            break;
     }
     
-    // Renderiza os sensores
-    renderSensors(id);
+    return labels;
+}
+
+function getTemperatureDataForRange(range) {
+    const baseTemp = 3.5;
+    let data = [];
     
-    // Cria o gráfico de histórico
-    createModalHistoryChart(id);
+    switch(range) {
+        case '1h':
+            data = [3.2, 3.3, 3.4, 3.5, 3.6, 3.5, 3.4, 3.3, 3.2, 3.3, 3.4, 3.5];
+            break;
+        case '6h':
+            data = [3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.6, 3.5, 3.4, 3.3, 3.4];
+            break;
+        case '12h':
+            data = [2.9, 3.0, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.5, 3.4, 3.3, 3.4];
+            break;
+        case '24h':
+            data = [2.8, 2.9, 3.0, 3.1, 3.2, 3.3, 3.4, 3.5, 3.4, 3.3, 3.2, 3.3];
+            break;
+    }
     
-    // Exibe o modal
-    const modal = document.getElementById('detailsModal');
-    modal.classList.add('active');
+    return data;
 }
 
-// Função para fechar o modal
-function closeModal() {
-    const modal = document.getElementById('detailsModal');
-    modal.classList.remove('active');
+// Atualizar gráficos
+function updateCharts() {
+    if (trendChart) {
+        trendChart.destroy();
+        createTrendChart();
+    }
+    
+    if (distributionChart) {
+        distributionChart.destroy();
+        createDistributionChart();
+    }
+    
+    updateTrendIndicators();
 }
 
-// Gerar relatório de incidente
-function generateIncidentReport() {
-    alert('Relatório de incidente gerado com sucesso!');
-    closeModal();
-}
-
-// Aplicar filtros
-function applyFilters() {
-    console.log('Aplicando filtros...');
-    // Implementar lógica de filtros
-}
-
-// Limpar filtros
-function clearFilters() {
-    document.getElementById('filterForm').reset();
-    alert('Filtros limpos com sucesso!');
+// Configurar event listeners
+function setupEventListeners() {
+    document.getElementById('exportChart').addEventListener('click', exportChart);
 }
 
 // Exportar gráfico
 function exportChart() {
-    alert('Gráfico exportado com sucesso!');
-}
-
-// Filtrar gráfico
-function filterChart() {
-    alert('Filtro aplicado ao gráfico!');
-}
-
-// Exportar relatório
-function exportReport() {
-    alert('Relatório exportado com sucesso!');
-}
-
-// Atualizar gráficos em tempo real
-function updateCharts() {
-    if (temperatureChart) {
-        // Simular pequenas variações nos dados
-        const newData = temperatureChart.data.datasets[0].data.map(temp => {
-            const variation = (Math.random() - 0.5) * 0.3;
-            return Math.max(2, Math.min(8, temp + variation));
-        });
-        
-        temperatureChart.data.datasets[0].data = newData;
-        temperatureChart.update('none');
-    }
-    
-    if (statusChart) {
-        // Simular pequenas variações na distribuição
-        const newData = statusChart.data.datasets[0].data.map((count, index) => {
-            if (index === 0) return Math.max(10, count + (Math.random() > 0.5 ? 1 : -1));
-            if (index === 1) return Math.max(1, count + (Math.random() > 0.7 ? 1 : -1));
-            return Math.max(0, count + (Math.random() > 0.8 ? 1 : -1));
-        });
-        
-        statusChart.data.datasets[0].data = newData;
-        statusChart.update('none');
+    if (trendChart) {
+        const image = trendChart.toBase64Image();
+        const link = document.createElement('a');
+        link.href = image;
+        link.download = `grafico_temperaturas_${currentFilters.timeRange}_${currentFilters.sensor}.png`;
+        link.click();
     }
 }
 
-// Simulação de atualização de dados em tempo real
-function updateTemperatures() {
-    const tempElements = document.querySelectorAll('.history-table td:nth-child(4)');
-    
-    tempElements.forEach(el => {
-        const currentTemp = parseFloat(el.querySelector('.multi-sensor').textContent.match(/-?\d+\.\d+/)[0]);
-        const variation = (Math.random() - 0.5) * 0.4; // Variação de ±0.2
-        const newTemp = Math.max(-5, Math.min(10, (currentTemp + variation))).toFixed(1);
-        
-        // Atualiza o indicador visual
-        const indicator = el.querySelector('.temp-indicator');
-        indicator.className = 'temp-indicator';
-        
-        if (newTemp >= 2 && newTemp <= 5) {
-            indicator.classList.add('temp-normal');
-        } else if (newTemp > 5 && newTemp <= 7) {
-            indicator.classList.add('temp-warning');
-        } else {
-            indicator.classList.add('temp-alert');
-        }
-        
-        // Atualiza o texto
-        const tempText = el.querySelector('.multi-sensor');
-        tempText.innerHTML = tempText.innerHTML.replace(/-?\d+\.\d+°C/, `${newTemp}°C`);
-        
-        // Atualiza o status na mesma linha
-        const statusCell = el.parentElement.querySelector('td:nth-child(5)');
-        const statusSpan = statusCell.querySelector('.status');
-        statusSpan.className = 'status';
-        
-        if (newTemp >= 2 && newTemp <= 5) {
-            statusSpan.classList.add('normal');
-            statusSpan.textContent = 'Normal';
-        } else if (newTemp > 5 && newTemp <= 7) {
-            statusSpan.classList.add('warning');
-            statusSpan.textContent = 'Atenção';
-        } else {
-            statusSpan.classList.add('alert');
-            statusSpan.textContent = 'Crítico';
-        }
-    });
-    
-    // Atualiza os cartões de resumo
-    const avgTempElement = document.querySelector('.temp-card:nth-child(1) .temp-card-value');
-    const maxTempElement = document.querySelector('.temp-card:nth-child(2) .temp-card-value');
-    const minTempElement = document.querySelector('.temp-card:nth-child(3) .temp-card-value');
-    
-    // Simula pequenas variações nos valores dos cartões
-    const currentAvg = parseFloat(avgTempElement.textContent);
-    const newAvg = (currentAvg + (Math.random() - 0.5) * 0.2).toFixed(1);
-    avgTempElement.textContent = `${newAvg}°C`;
-}
-
-// Iniciar atualizações em tempo real
+// Atualização em tempo real
 function startRealTimeUpdates() {
-    // Atualiza temperaturas a cada 15 segundos
-    setInterval(updateTemperatures, 15000);
-    
-    // Atualiza gráficos a cada 20 segundos
-    setInterval(updateCharts, 20000);
+    setInterval(async () => {
+        try {
+            await loadSensorData();
+            updateMetrics();
+            updateCharts();
+        } catch (error) {
+            console.error('Erro na atualização em tempo real:', error);
+        }
+    }, 30000);
 }
+
+setTimeout(startRealTimeUpdates, 5000);

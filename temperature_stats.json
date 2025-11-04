@@ -1,0 +1,47 @@
+{
+  "1": {
+    "avg_temperature": 19.4,
+    "max_temperature": 20.3,
+    "min_temperature": 18.2,
+    "critical_sensors": 6,
+    "warning_sensors": 0,
+    "period_hours": 1,
+    "timestamp": "2025-10-30T17:23:49.834246-03:00"
+  },
+  "6": {
+    "avg_temperature": 18.6,
+    "max_temperature": 20.3,
+    "min_temperature": 16.8,
+    "critical_sensors": 6,
+    "warning_sensors": 0,
+    "period_hours": 6,
+    "timestamp": "2025-10-30T17:23:51.040625-03:00"
+  },
+  "12": {
+    "avg_temperature": 18.6,
+    "max_temperature": 20.3,
+    "min_temperature": 16.8,
+    "critical_sensors": 6,
+    "warning_sensors": 0,
+    "period_hours": 12,
+    "timestamp": "2025-10-30T17:23:52.232743-03:00"
+  },
+  "24": {
+    "avg_temperature": 18.6,
+    "max_temperature": 20.3,
+    "min_temperature": 16.8,
+    "critical_sensors": 6,
+    "warning_sensors": 0,
+    "period_hours": 24,
+    "timestamp": "2025-10-30T17:23:54.035286-03:00"
+  },
+  "168": {
+    "avg_temperature": 20.8,
+    "max_temperature": 23.8,
+    "min_temperature": 0.2,
+    "critical_sensors": 6,
+    "warning_sensors": 6,
+    "period_hours": 168,
+    "timestamp": "2025-10-30T17:23:55.880294-03:00"
+  }
+}

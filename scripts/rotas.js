@@ -1,880 +1,896 @@
 // Variáveis globais
-let appData = {};
-let currentPage = 1;
-const itemsPerPage = 5;
-let routeMap = null;
-let routeLine = null;
+let routesData = [];
+let currentFilters = {
+    status: 'all',
+    vehicle: 'all',
+    date: 'week'
+};
+let map;
+let currentRouteLayer = null;
 
-// Funções de modal (globais)
-function openModal(modal) {
-    modal.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
+// Sistema de Loading
+function showLoading() {
+    const loadingOverlay = document.getElementById('globalLoading');
+    if (loadingOverlay) {
+        loadingOverlay.classList.remove('hidden');
+    }
 }
 
-function closeModal(modal) {
-    modal.style.display = 'none';
-    document.body.style.overflow = 'auto';
+function hideLoading() {
+    const loadingOverlay = document.getElementById('globalLoading');
+    if (loadingOverlay) {
+        loadingOverlay.classList.add('hidden');
+    }
 }
 
 // Inicialização da aplicação
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM carregado, iniciando aplicação de rotas...');
+document.addEventListener('DOMContentLoaded', async function() {
+    console.log('Inicializando página de rotas...');
     
-    // Carregar dados do JSON
-    fetchData()
-        .then(data => {
-            console.log('Dados carregados com sucesso:', data);
-            appData = data;
-            initializeApp();
-        })
-        .catch(error => {
-            console.error('Erro ao carregar dados:', error);
-            // Dados de fallback em caso de erro
-            appData = getFallbackData();
-            initializeApp();
-        });
+    showLoading();
+    
+    try {
+        // Inicializar mapa
+        initializeMap();
+        
+        // Carregar dados
+        await loadRoutesData();
+        
+        // Inicializar componentes
+        initializeFilters();
+        updateSummaryCards();
+        displayRoutes();
+        
+        // Configurar event listeners
+        setupEventListeners();
+        
+        hideLoading();
+        
+    } catch (error) {
+        console.error('Erro na inicialização:', error);
+        hideLoading();
+    }
 });
 
-// Função para carregar dados do JSON
-async function fetchData() {
-    console.log('Tentando carregar dados de ./data.json');
-    const response = await fetch('./data.json');
-    if (!response.ok) {
-        throw new Error(`Erro HTTP: ${response.status}`);
-    }
-    return await response.json();
-}
-
-// Função para inicializar a aplicação
-function initializeApp() {
-    console.log('Inicializando aplicação de rotas...');
-    setupEventListeners();
-    populateRoutesTable();
-    setupPagination();
-}
-
-// Configurar event listeners
-function setupEventListeners() {
-    console.log('Configurando event listeners...');
+// Inicializar mapa Leaflet
+function initializeMap() {
+    console.log('Inicializando mapa...');
     
-    // Modal functionality
-    const addModal = document.getElementById('addRouteModal');
-    const detailsModal = document.getElementById('routeDetailsModal');
-    const addBtn = document.getElementById('addRouteBtn');
-    const cancelBtn = document.getElementById('cancelAddRoute');
-    const closeButtons = document.querySelectorAll('.close-modal');
-    const closeDetailsBtn = document.querySelector('.close-details');
-    const saveRouteBtn = document.getElementById('saveRouteBtn');
-    const editRouteBtn = document.getElementById('editRouteBtn');
-    const exportBtn = document.getElementById('exportBtn');
+    // Coordenadas iniciais (Centro de São Paulo como exemplo)
+    const initialCoords = [-23.5505, -46.6333];
+    
+    // Criar mapa
+    map = L.map('routeMap').setView(initialCoords, 12);
+    
+    // Adicionar tile layer (OpenStreetMap)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 18
+    }).addTo(map);
+    
+    console.log('Mapa inicializado com sucesso');
+}
+
+// Carregar dados das rotas
+async function loadRoutesData() {
+    try {
+        console.log('Carregando dados das rotas...');
+        
+        // Em um sistema real, isso viria de uma API
+        // Por enquanto, vamos gerar dados de exemplo baseados no veículo KG8000003
+        routesData = generateSampleRoutesData();
+        console.log('Dados das rotas carregados:', routesData);
+        
+    } catch (error) {
+        console.error('Erro ao carregar dados das rotas:', error);
+        routesData = getFallbackRoutesData();
+    }
+}
+
+// Gerar dados de exemplo de rotas
+function generateSampleRoutesData() {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    return [
+        {
+            id: 'RT001',
+            vehicle: 'KG8000003',
+            driver: 'Carlos Silva',
+            status: 'active',
+            origin: 'Centro de Distribuição - Zona Leste',
+            destination: 'Supermercado ABC - Zona Sul',
+            distance: 25.8,
+            duration: 45,
+            progress: 65,
+            startTime: new Date(today.getTime() + 8 * 60 * 60 * 1000), // 08:00
+            endTime: new Date(today.getTime() + 9 * 60 * 60 * 1000), // 09:00
+            currentLocation: [-23.5600, -46.6400],
+            stops: [
+                { name: 'Centro de Distribuição', address: 'Av. Industrial, 1000', status: 'completed' },
+                { name: 'Posto de Combustível', address: 'Av. das Nações, 500', status: 'completed' },
+                { name: 'Supermercado ABC', address: 'Rua Comercial, 250', status: 'pending' }
+            ],
+            temperatureStatus: 'normal',
+            priority: 'high'
+        },
+        {
+            id: 'RT002',
+            vehicle: 'KG8000003',
+            driver: 'Ana Santos',
+            status: 'scheduled',
+            origin: 'Centro de Distribuição - Zona Leste',
+            destination: 'Restaurante XYZ - Centro',
+            distance: 18.5,
+            duration: 35,
+            progress: 0,
+            startTime: new Date(today.getTime() + 14 * 60 * 60 * 1000), // 14:00
+            endTime: new Date(today.getTime() + 15 * 60 * 60 * 1000), // 15:00
+            currentLocation: null,
+            stops: [
+                { name: 'Centro de Distribuição', address: 'Av. Industrial, 1000', status: 'pending' },
+                { name: 'Restaurante XYZ', address: 'Rua Central, 150', status: 'pending' }
+            ],
+            temperatureStatus: 'normal',
+            priority: 'medium'
+        },
+        {
+            id: 'RT003',
+            vehicle: 'KG8000003',
+            driver: 'João Oliveira',
+            status: 'completed',
+            origin: 'Centro de Distribuição - Zona Leste',
+            destination: 'Mercado Municipal - Centro',
+            distance: 22.3,
+            duration: 40,
+            progress: 100,
+            startTime: new Date(yesterday.getTime() + 10 * 60 * 60 * 1000), // 10:00
+            endTime: new Date(yesterday.getTime() + 11 * 60 * 60 * 1000), // 11:00
+            currentLocation: null,
+            stops: [
+                { name: 'Centro de Distribuição', address: 'Av. Industrial, 1000', status: 'completed' },
+                { name: 'Mercado Municipal', address: 'Praça da República, 100', status: 'completed' }
+            ],
+            temperatureStatus: 'normal',
+            priority: 'medium'
+        },
+        {
+            id: 'RT004',
+            vehicle: 'KG8000003',
+            driver: 'Carlos Silva',
+            status: 'cancelled',
+            origin: 'Centro de Distribuição - Zona Leste',
+            destination: 'Shopping Center - Zona Oeste',
+            distance: 30.2,
+            duration: 55,
+            progress: 0,
+            startTime: new Date(yesterday.getTime() + 16 * 60 * 60 * 1000), // 16:00
+            endTime: new Date(yesterday.getTime() + 17 * 60 * 60 * 1000), // 17:00
+            currentLocation: null,
+            stops: [
+                { name: 'Centro de Distribuição', address: 'Av. Industrial, 1000', status: 'pending' },
+                { name: 'Shopping Center', address: 'Av. Comercial, 2000', status: 'pending' }
+            ],
+            temperatureStatus: 'normal',
+            priority: 'low',
+            cancellationReason: 'Problema mecânico no veículo'
+        }
+    ];
+}
+
+// Dados de fallback para rotas
+function getFallbackRoutesData() {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    return [
+        {
+            id: 'RT001',
+            vehicle: 'KG8000003',
+            driver: 'Motorista KG8000003',
+            status: 'active',
+            origin: 'Centro de Distribuição',
+            destination: 'Ponto de Entrega 1',
+            distance: 15.5,
+            duration: 30,
+            progress: 45,
+            startTime: new Date(today.getTime() + 8 * 60 * 60 * 1000),
+            endTime: new Date(today.getTime() + 9 * 60 * 60 * 1000),
+            currentLocation: [-23.5505, -46.6333],
+            stops: [
+                { name: 'Origem', address: 'Centro de Distribuição', status: 'completed' },
+                { name: 'Destino', address: 'Ponto de Entrega 1', status: 'pending' }
+            ],
+            temperatureStatus: 'normal',
+            priority: 'medium'
+        }
+    ];
+}
+
+// Inicializar filtros
+function initializeFilters() {
+    const statusFilter = document.getElementById('statusFilter');
+    const vehicleFilter = document.getElementById('vehicleFilter');
+    const dateFilter = document.getElementById('dateFilter');
+    const applyFiltersBtn = document.getElementById('applyFilters');
     const refreshBtn = document.getElementById('refreshBtn');
-    const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+    const newRouteBtn = document.getElementById('newRouteBtn');
     
-    // Event listeners para modais
-    addBtn.addEventListener('click', () => openModal(addModal));
+    statusFilter.value = currentFilters.status;
+    vehicleFilter.value = currentFilters.vehicle;
+    dateFilter.value = currentFilters.date;
     
-    closeButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            closeModal(addModal);
-            closeModal(detailsModal);
-        });
-    });
-    
-    cancelBtn.addEventListener('click', () => closeModal(addModal));
-    closeDetailsBtn.addEventListener('click', () => closeModal(detailsModal));
-    
-    window.addEventListener('click', (e) => {
-        if (e.target === addModal) closeModal(addModal);
-        if (e.target === detailsModal) closeModal(detailsModal);
-    });
-    
-    // Salvar rota
-    saveRouteBtn.addEventListener('click', saveRoute);
-    
-    // Editar rota
-    editRouteBtn.addEventListener('click', editRoute);
-    
-    // Exportar dados
-    exportBtn.addEventListener('click', exportData);
-    
-    // Atualizar dados
+    applyFiltersBtn.addEventListener('click', applyFilters);
     refreshBtn.addEventListener('click', refreshData);
-    
-    // Limpar filtros
-    clearFiltersBtn.addEventListener('click', clearFilters);
-    
-    // Filtros em tempo real
-    const filterForm = document.getElementById('filterForm');
-    filterForm.addEventListener('input', applyFilters);
-}
-
-// Dados de exemplo para as rotas
-const routeData = {
-    "1": {
-        nome: "Rota Centro-Sul",
-        origem: "Centro",
-        destino: "Zona Sul",
-        distancia: "18.5 km",
-        tempo: "45 minutos",
-        veiculos: "5",
-        entregas: "28",
-        consumo: "7.8 km/L",
-        status: "active",
-        motoristaPrincipal: "Carlos Silva",
-        motoristaSuplentes: "Ana Santos, Roberto Alves",
-        primeiraSaida: "06:30",
-        ultimaSaida: "14:00",
-        frequencia: "A cada 2 horas",
-        temperatura: {
-            media: "3.4°C",
-            status: "normal",
-            range: "2°C a 5°C",
-            ultimaAtualizacao: "10/09/2023 14:25"
-        },
-        sensores: [
-            { name: "Sensor Principal", value: "3.2°C", status: "normal", location: "Centro da carga" },
-            { name: "Sensor da Porta", value: "3.5°C", status: "normal", location: "Perto da porta" },
-            { name: "Sensor do Fundo", value: "2.9°C", status: "normal", location: "Fundo do veículo" },
-            { name: "Sensor do Teto", value: "3.3°C", status: "normal", location: "Teto traseiro" }
-        ]
-    },
-    "2": {
-        nome: "Rota Norte-Centro",
-        origem: "Zona Norte",
-        destino: "Centro",
-        distancia: "22.3 km",
-        tempo: "55 minutos",
-        veiculos: "3",
-        entregas: "22",
-        consumo: "7.2 km/L",
-        status: "active",
-        motoristaPrincipal: "Ana Santos",
-        motoristaSuplentes: "João Costa, Maria Oliveira",
-        primeiraSaida: "07:00",
-        ultimaSaida: "15:00",
-        frequencia: "A cada 3 horas",
-        temperatura: {
-            media: "8.1°C",
-            status: "alert",
-            range: "2°C a 5°C",
-            ultimaAtualizacao: "10/09/2023 14:20"
-        },
-        sensores: [
-            { name: "Sensor Principal", value: "8.1°C", status: "alert", location: "Centro da carga" },
-            { name: "Sensor da Porta", value: "9.2°C", status: "alert", location: "Perto da porta" },
-            { name: "Sensor do Fundo", value: "7.8°C", status: "alert", location: "Fundo do veículo" },
-            { name: "Sensor do Teto", value: "7.5°C", status: "alert", location: "Teto traseiro" }
-        ]
-    },
-    "3": {
-        nome: "Rota Oeste-Aeroporto",
-        origem: "Zona Oeste",
-        destino: "Aeroporto",
-        distancia: "35.7 km",
-        tempo: "1h 15min",
-        veiculos: "2",
-        entregas: "15",
-        consumo: "8.1 km/L",
-        status: "active",
-        motoristaPrincipal: "Roberto Alves",
-        motoristaSuplentes: "Carlos Silva, João Costa",
-        primeiraSaida: "05:30",
-        ultimaSaida: "13:30",
-        frequencia: "A cada 4 horas",
-        temperatura: {
-            media: "6.3°C",
-            status: "warning",
-            range: "2°C a 5°C",
-            ultimaAtualizacao: "10/09/2023 14:18"
-        },
-        sensores: [
-            { name: "Sensor Principal", value: "6.3°C", status: "warning", location: "Centro da carga" },
-            { name: "Sensor da Porta", value: "7.1°C", status: "alert", location: "Perto da porta" },
-            { name: "Sensor do Fundo", value: "5.8°C", status: "warning", location: "Fundo do veículo" },
-            { name: "Sensor do Teto", value: "6.0°C", status: "warning", location: "Teto traseiro" }
-        ]
-    },
-    "4": {
-        nome: "Rota Leste-Centro",
-        origem: "Zona Leste",
-        destino: "Centro",
-        distancia: "16.8 km",
-        tempo: "40 minutos",
-        veiculos: "4",
-        entregas: "32",
-        consumo: "7.5 km/L",
-        status: "active",
-        motoristaPrincipal: "Maria Oliveira",
-        motoristaSuplentes: "Ana Santos, Roberto Alves",
-        primeiraSaida: "06:00",
-        ultimaSaida: "16:00",
-        frequencia: "A cada 2 horas",
-        temperatura: {
-            media: "4.0°C",
-            status: "normal",
-            range: "2°C a 5°C",
-            ultimaAtualizacao: "10/09/2023 14:15"
-        },
-        sensores: [
-            { name: "Sensor Principal", value: "4.0°C", status: "normal", location: "Centro da carga" },
-            { name: "Sensor da Porta", value: "4.3°C", status: "normal", location: "Perto da porta" },
-            { name: "Sensor do Fundo", value: "3.7°C", status: "normal", location: "Fundo do veículo" },
-            { name: "Sensor do Teto", value: "4.1°C", status: "normal", location: "Teto traseiro" }
-        ]
-    },
-    "5": {
-        nome: "Rota Aeroporto-Sul",
-        origem: "Aeroporto",
-        destino: "Zona Sul",
-        distancia: "28.4 km",
-        tempo: "1h 05min",
-        veiculos: "2",
-        entregas: "12",
-        consumo: "7.9 km/L",
-        status: "inactive",
-        motoristaPrincipal: "João Costa",
-        motoristaSuplentes: "Carlos Silva, Maria Oliveira",
-        primeiraSaida: "08:00",
-        ultimaSaida: "12:00",
-        frequencia: "A cada 6 horas",
-        temperatura: {
-            media: "1.2°C",
-            status: "warning",
-            range: "2°C a 5°C",
-            ultimaAtualizacao: "10/09/2023 14:10"
-        },
-        sensores: [
-            { name: "Sensor Principal", value: "1.2°C", status: "warning", location: "Centro da carga" },
-            { name: "Sensor da Porta", value: "1.5°C", status: "warning", location: "Perto da porta" },
-            { name: "Sensor do Fundo", value: "0.9°C", status: "alert", location: "Fundo do veículo" },
-            { name: "Sensor do Teto", value: "1.3°C", status: "warning", location: "Teto traseiro" }
-        ]
-    }
-};
-
-// Popular a tabela de rotas
-function populateRoutesTable() {
-    const tableBody = document.getElementById('routesTableBody');
-    tableBody.innerHTML = '';
-    
-    const routes = Object.values(routeData);
-    console.log('Populando tabela com', routes.length, 'rotas');
-    
-    // Aplicar filtros
-    const filteredRoutes = applyFiltersToData(routes);
-    
-    // Paginação
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    const paginatedRoutes = filteredRoutes.slice(startIndex, endIndex);
-    
-    if (paginatedRoutes.length === 0) {
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="7" style="text-align: center; padding: 40px; color: #777;">
-                    <i class="fas fa-route" style="font-size: 40px; margin-bottom: 10px; display: block;"></i>
-                    Nenhuma rota encontrada
-                </td>
-            </tr>
-        `;
-        return;
-    }
-    
-    paginatedRoutes.forEach((route, index) => {
-        const routeId = Object.keys(routeData)[index];
-        const row = document.createElement('tr');
-        
-        // Determinar classe do status
-        let statusClass = route.status === 'active' ? 'active' : 'inactive';
-        let statusText = route.status === 'active' ? 'Ativa' : 'Inativa';
-        
-        row.innerHTML = `
-            <td>${route.nome}</td>
-            <td>${route.origem} - ${route.destino}</td>
-            <td>${route.distancia}</td>
-            <td>${route.tempo}</td>
-            <td>${route.veiculos} veículos</td>
-            <td><span class="status ${statusClass}">${statusText}</span></td>
-            <td>
-                <div class="action-buttons">
-                    <button class="btn-action view" title="Visualizar" data-route-id="${routeId}"><i class="fas fa-eye"></i></button>
-                    <button class="btn-action edit" title="Editar" data-route-id="${routeId}"><i class="fas fa-pencil-alt"></i></button>
-                    <button class="btn-action delete" title="Excluir" data-route-id="${routeId}"><i class="fas fa-trash"></i></button>
-                </div>
-            </td>
-        `;
-        
-        tableBody.appendChild(row);
-    });
-    
-    // Atualizar contador
-    updateRouteCount(filteredRoutes.length);
-    
-    // Configurar botões de ação
-    setupActionButtons();
-}
-
-// Configurar botões de ação
-function setupActionButtons() {
-    // Visualizar detalhes
-    const viewButtons = document.querySelectorAll('.btn-action.view');
-    viewButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const routeId = this.getAttribute('data-route-id');
-            console.log('Abrindo detalhes da rota:', routeId);
-            populateRouteDetails(routeId);
-            const detailsModal = document.getElementById('routeDetailsModal');
-            openModal(detailsModal);
-        });
-    });
-    
-    // Editar rota
-    const editButtons = document.querySelectorAll('.btn-action.edit');
-    editButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const routeId = this.getAttribute('data-route-id');
-            editRoute(routeId);
-        });
-    });
-    
-    // Excluir rota
-    const deleteButtons = document.querySelectorAll('.btn-action.delete');
-    deleteButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const routeId = this.getAttribute('data-route-id');
-            deleteRoute(routeId);
-        });
-    });
-}
-
-// Configurar paginação
-function setupPagination() {
-    const paginationContainer = document.getElementById('pagination');
-    const routes = Object.values(routeData);
-    const filteredRoutes = applyFiltersToData(routes);
-    const totalPages = Math.ceil(filteredRoutes.length / itemsPerPage);
-    
-    paginationContainer.innerHTML = '';
-    
-    if (totalPages <= 1) return;
-    
-    // Botão anterior
-    const prevButton = document.createElement('div');
-    prevButton.className = 'pagination-item';
-    prevButton.innerHTML = '<i class="fas fa-chevron-left"></i>';
-    prevButton.addEventListener('click', () => {
-        if (currentPage > 1) {
-            currentPage--;
-            populateRoutesTable();
-            setupPagination();
-        }
-    });
-    paginationContainer.appendChild(prevButton);
-    
-    // Páginas
-    for (let i = 1; i <= totalPages; i++) {
-        const pageButton = document.createElement('div');
-        pageButton.className = `pagination-item ${i === currentPage ? 'active' : ''}`;
-        pageButton.textContent = i;
-        pageButton.addEventListener('click', () => {
-            currentPage = i;
-            populateRoutesTable();
-            setupPagination();
-        });
-        paginationContainer.appendChild(pageButton);
-    }
-    
-    // Botão próximo
-    const nextButton = document.createElement('div');
-    nextButton.className = 'pagination-item';
-    nextButton.innerHTML = '<i class="fas fa-chevron-right"></i>';
-    nextButton.addEventListener('click', () => {
-        if (currentPage < totalPages) {
-            currentPage++;
-            populateRoutesTable();
-            setupPagination();
-        }
-    });
-    paginationContainer.appendChild(nextButton);
-}
-
-// Aplicar filtros aos dados
-function applyFiltersToData(routes) {
-    const searchTerm = document.getElementById('search').value.toLowerCase();
-    const statusFilter = document.getElementById('status').value;
-    const regionFilter = document.getElementById('region').value;
-    const vehicleFilter = document.getElementById('vehicle').value;
-    
-    return routes.filter(route => {
-        // Filtro de busca
-        if (searchTerm && !route.nome.toLowerCase().includes(searchTerm) && 
-            !route.origem.toLowerCase().includes(searchTerm) &&
-            !route.destino.toLowerCase().includes(searchTerm)) {
-            return false;
-        }
-        
-        // Filtro de status
-        if (statusFilter && route.status !== statusFilter) {
-            return false;
-        }
-        
-        // Filtro de região
-        if (regionFilter) {
-            const origem = route.origem.toLowerCase();
-            const destino = route.destino.toLowerCase();
-            const filter = regionFilter.toLowerCase();
-            
-            if (!origem.includes(filter) && !destino.includes(filter)) {
-                return false;
-            }
-        }
-        
-        // Filtro de tipo de veículo (simulação)
-        if (vehicleFilter) {
-            const veiculos = parseInt(route.veiculos);
-            if (vehicleFilter === 'small' && veiculos > 3) return false;
-            if (vehicleFilter === 'medium' && (veiculos <= 2 || veiculos > 5)) return false;
-            if (vehicleFilter === 'large' && veiculos <= 3) return false;
-        }
-        
-        return true;
-    });
+    newRouteBtn.addEventListener('click', showNewRouteModal);
 }
 
 // Aplicar filtros
 function applyFilters() {
-    currentPage = 1;
-    populateRoutesTable();
-    setupPagination();
-}
-
-// Limpar filtros
-function clearFilters() {
-    document.getElementById('filterForm').reset();
-    applyFilters();
-}
-
-// Atualizar contador de rotas
-function updateRouteCount(count) {
-    const totalRoutes = Object.keys(routeData).length;
-    document.getElementById('routeCount').textContent = `Mostrando ${count} de ${totalRoutes} rotas`;
-}
-
-// Função para renderizar os sensores no modal
-function renderSensors(sensors) {
-    const sensorsContainer = document.getElementById('sensors-container');
-    sensorsContainer.innerHTML = '';
+    const statusFilter = document.getElementById('statusFilter');
+    const vehicleFilter = document.getElementById('vehicleFilter');
+    const dateFilter = document.getElementById('dateFilter');
     
-    sensors.forEach(sensor => {
-        const sensorCard = document.createElement('div');
-        sensorCard.className = `sensor-card ${sensor.status}`;
+    currentFilters = {
+        status: statusFilter.value,
+        vehicle: vehicleFilter.value,
+        date: dateFilter.value
+    };
+    
+    console.log('Aplicando filtros:', currentFilters);
+    displayRoutes();
+    updateMap();
+}
+
+// Atualizar cards de resumo
+function updateSummaryCards() {
+    const activeRoutes = routesData.filter(route => route.status === 'active').length;
+    const completedRoutes = routesData.filter(route => route.status === 'completed').length;
+    const activeVehicles = routesData.filter(route => 
+        route.status === 'active' || route.status === 'scheduled'
+    ).length;
+    
+    // Calcular eficiência (exemplo simplificado)
+    const totalCompleted = routesData.filter(route => route.status === 'completed').length;
+    const totalScheduled = routesData.filter(route => 
+        route.status === 'scheduled' || route.status === 'completed'
+    ).length;
+    
+    const efficiencyRate = totalScheduled > 0 ? 
+        Math.round((totalCompleted / totalScheduled) * 100) : 100;
+    
+    document.getElementById('active-routes').textContent = activeRoutes;
+    document.getElementById('completed-routes').textContent = completedRoutes;
+    document.getElementById('active-vehicles').textContent = activeVehicles;
+    document.getElementById('efficiency-rate').textContent = `${efficiencyRate}%`;
+}
+
+// Exibir rotas na lista
+function displayRoutes() {
+    const routesList = document.getElementById('routesList');
+    const routesCount = document.getElementById('routesCount');
+    
+    // Filtrar rotas
+    let filteredRoutes = routesData.filter(route => {
+        // Filtro de status
+        if (currentFilters.status !== 'all' && route.status !== currentFilters.status) {
+            return false;
+        }
         
-        sensorCard.innerHTML = `
-            <div class="sensor-card-header">
-                <div class="sensor-card-title">${sensor.name}</div>
-                <span class="status ${sensor.status}">${sensor.status === 'normal' ? 'Normal' : sensor.status === 'warning' ? 'Atenção' : 'Crítico'}</span>
+        // Filtro de veículo
+        if (currentFilters.vehicle !== 'all' && route.vehicle !== currentFilters.vehicle) {
+            return false;
+        }
+        
+        // Filtro de data (implementação básica)
+        if (currentFilters.date !== 'all') {
+            const today = new Date();
+            const routeDate = new Date(route.startTime);
+            
+            switch(currentFilters.date) {
+                case 'today':
+                    if (routeDate.toDateString() !== today.toDateString()) return false;
+                    break;
+                case 'week':
+                    const weekAgo = new Date(today);
+                    weekAgo.setDate(weekAgo.getDate() - 7);
+                    if (routeDate < weekAgo) return false;
+                    break;
+                case 'month':
+                    const monthAgo = new Date(today);
+                    monthAgo.setMonth(monthAgo.getMonth() - 1);
+                    if (routeDate < monthAgo) return false;
+                    break;
+            }
+        }
+        
+        return true;
+    });
+    
+    // Ordenar rotas (ativas primeiro, depois agendadas, concluídas, canceladas)
+    const statusOrder = { 'active': 4, 'scheduled': 3, 'completed': 2, 'cancelled': 1 };
+    filteredRoutes.sort((a, b) => {
+        if (statusOrder[a.status] !== statusOrder[b.status]) {
+            return statusOrder[b.status] - statusOrder[a.status];
+        }
+        return new Date(b.startTime) - new Date(a.startTime);
+    });
+    
+    // Atualizar contador
+    routesCount.textContent = `${filteredRoutes.length} rota${filteredRoutes.length !== 1 ? 's' : ''}`;
+    
+    // Limpar lista
+    routesList.innerHTML = '';
+    
+    if (filteredRoutes.length === 0) {
+        routesList.innerHTML = `
+            <div class="no-routes">
+                <i class="fas fa-route" style="font-size: 48px; color: var(--gray); margin-bottom: 15px;"></i>
+                <p>Nenhuma rota encontrada com os filtros aplicados</p>
             </div>
-            <div class="sensor-card-value">${sensor.value}</div>
-            <div class="sensor-card-location">${sensor.location}</div>
         `;
-        
-        sensorsContainer.appendChild(sensorCard);
+        return;
+    }
+    
+    // Adicionar rotas à lista
+    filteredRoutes.forEach(route => {
+        const routeElement = createRouteElement(route);
+        routesList.appendChild(routeElement);
     });
 }
 
-// Função para obter coordenadas fictícias baseadas na rota
-function getRouteCoordinates(route) {
-    const routeCoordinates = {
-        "1": { // Centro-Sul
-            origin: [-23.5505, -46.6333], // Centro
-            destination: [-23.6505, -46.7333], // Zona Sul
-            waypoints: [
-                [-23.5605, -46.6433],
-                [-23.5805, -46.6633],
-                [-23.6005, -46.6833],
-                [-23.6205, -46.7033],
-                [-23.6405, -46.7233]
-            ]
-        },
-        "2": { // Norte-Centro
-            origin: [-23.5005, -46.6333], // Zona Norte
-            destination: [-23.5505, -46.6333], // Centro
-            waypoints: [
-                [-23.5105, -46.6333],
-                [-23.5205, -46.6333],
-                [-23.5305, -46.6333],
-                [-23.5405, -46.6333]
-            ]
-        },
-        "3": { // Oeste-Aeroporto
-            origin: [-23.5505, -46.7333], // Zona Oeste
-            destination: [-23.4356, -46.4737], // Aeroporto
-            waypoints: [
-                [-23.5405, -46.7233],
-                [-23.5205, -46.6833],
-                [-23.5005, -46.6433],
-                [-23.4805, -46.6033],
-                [-23.4605, -46.5633],
-                [-23.4456, -46.5237]
-            ]
-        },
-        "4": { // Leste-Centro
-            origin: [-23.5505, -46.5333], // Zona Leste
-            destination: [-23.5505, -46.6333], // Centro
-            waypoints: [
-                [-23.5505, -46.5433],
-                [-23.5505, -46.5533],
-                [-23.5505, -46.5633],
-                [-23.5505, -46.5733],
-                [-23.5505, -46.5833],
-                [-23.5505, -46.5933],
-                [-23.5505, -46.6033],
-                [-23.5505, -46.6133],
-                [-23.5505, -46.6233]
-            ]
-        },
-        "5": { // Aeroporto-Sul
-            origin: [-23.4356, -46.4737], // Aeroporto
-            destination: [-23.6505, -46.7333], // Zona Sul
-            waypoints: [
-                [-23.4456, -46.4937],
-                [-23.4656, -46.5337],
-                [-23.4856, -46.5737],
-                [-23.5056, -46.6137],
-                [-23.5256, -46.6537],
-                [-23.5456, -46.6937],
-                [-23.5656, -46.7137],
-                [-23.5856, -46.7237],
-                [-23.6056, -46.7337],
-                [-23.6256, -46.7337]
-            ]
-        }
-    };
+// Criar elemento de rota
+function createRouteElement(route) {
+    const routeElement = document.createElement('div');
+    routeElement.className = 'route-item';
+    routeElement.setAttribute('data-route-id', route.id);
     
-    const routeId = Object.keys(routeData).find(key => routeData[key] === route);
-    return routeCoordinates[routeId] || routeCoordinates["1"];
+    const statusClass = route.status;
+    const timeText = formatRouteTime(route.startTime);
+    const distanceText = `${route.distance} km`;
+    const durationText = `${route.duration} min`;
+    
+    routeElement.innerHTML = `
+        <div class="route-status ${statusClass}"></div>
+        <div class="route-content">
+            <div class="route-header">
+                <div class="route-id">${route.id}</div>
+                <span class="route-badge ${statusClass}">${getStatusText(route.status)}</span>
+                ${route.priority === 'high' ? '<span class="route-badge" style="background: rgba(220,53,69,0.1); color: #dc3545;">Alta</span>' : ''}
+            </div>
+            <div class="route-info">${route.origin} → ${route.destination}</div>
+            <div class="route-meta">
+                <div class="route-meta-item">
+                    <i class="fas fa-truck"></i>
+                    <span>${route.vehicle}</span>
+                </div>
+                <div class="route-meta-item">
+                    <i class="fas fa-user"></i>
+                    <span>${route.driver}</span>
+                </div>
+                <div class="route-meta-item">
+                    <i class="fas fa-road"></i>
+                    <span>${distanceText}</span>
+                </div>
+                <div class="route-meta-item">
+                    <i class="fas fa-clock"></i>
+                    <span>${timeText}</span>
+                </div>
+            </div>
+        </div>
+        <div class="route-actions">
+            <button class="btn-action view" title="Ver Detalhes">
+                <i class="fas fa-eye"></i>
+            </button>
+            ${route.status === 'active' ? `
+                <button class="btn-action track" title="Acompanhar Rota">
+                    <i class="fas fa-map-marker-alt"></i>
+                </button>
+            ` : ''}
+        </div>
+    `;
+    
+    // Adicionar event listeners
+    const viewBtn = routeElement.querySelector('.btn-action.view');
+    const trackBtn = routeElement.querySelector('.btn-action.track');
+    
+    viewBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        showRouteDetails(route.id);
+    });
+    
+    if (trackBtn) {
+        trackBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            trackRoute(route.id);
+        });
+    }
+    
+    routeElement.addEventListener('click', () => {
+        showRouteDetails(route.id);
+    });
+    
+    return routeElement;
 }
 
-// Função para inicializar o mapa
-function initMap(routeId) {
-    const route = routeData[routeId];
+// Obter texto do status
+function getStatusText(status) {
+    const texts = {
+        'active': 'Ativa',
+        'scheduled': 'Agendada',
+        'completed': 'Concluída',
+        'cancelled': 'Cancelada'
+    };
+    return texts[status] || status;
+}
+
+// Formatar horário da rota
+function formatRouteTime(timestamp) {
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString('pt-BR', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+    });
+}
+
+// Atualizar mapa com as rotas
+function updateMap() {
+    // Limpar rota atual
+    if (currentRouteLayer) {
+        map.removeLayer(currentRouteLayer);
+        currentRouteLayer = null;
+    }
+    
+    // Encontrar rotas ativas para mostrar no mapa
+    const activeRoutes = routesData.filter(route => route.status === 'active');
+    
+    if (activeRoutes.length > 0) {
+        // Mostrar a primeira rota ativa no mapa
+        const route = activeRoutes[0];
+        showRouteOnMap(route);
+    } else {
+        // Mostrar mensagem de nenhuma rota ativa
+        const bounds = map.getBounds();
+        const center = bounds.getCenter();
+        
+        L.marker(center).addTo(map)
+            .bindPopup('Nenhuma rota ativa no momento')
+            .openPopup();
+    }
+}
+
+// Mostrar rota no mapa
+function showRouteOnMap(route) {
+    if (!route.currentLocation) return;
+    
+    // Limpar rota anterior
+    if (currentRouteLayer) {
+        map.removeLayer(currentRouteLayer);
+    }
+    
+    // Adicionar marcador da localização atual
+    const currentLocationMarker = L.marker(route.currentLocation)
+        .addTo(map)
+        .bindPopup(`
+            <div class="map-popup">
+                <strong>${route.vehicle}</strong><br>
+                ${route.driver}<br>
+                Rota: ${route.id}<br>
+                Status: ${getStatusText(route.status)}<br>
+                Progresso: ${route.progress}%
+            </div>
+        `)
+        .openPopup();
+    
+    // Centralizar mapa na localização atual
+    map.setView(route.currentLocation, 13);
+    
+    currentRouteLayer = currentLocationMarker;
+}
+
+// Acompanhar rota
+function trackRoute(routeId) {
+    const route = routesData.find(r => r.id === routeId);
     if (!route) return;
     
-    // Destruir mapa anterior se existir
-    if (routeMap) {
-        routeMap.remove();
-        routeMap = null;
-    }
-    
-    const mapContainer = document.getElementById('routeMap');
-    if (!mapContainer) return;
-    
-    // Coordenadas fictícias baseadas na rota
-    const coordinates = getRouteCoordinates(route);
-    
-    // Criar mapa
-    routeMap = L.map('routeMap').setView(coordinates.center || coordinates.origin, 12);
-    
-    // Adicionar tile layer (OpenStreetMap)
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(routeMap);
-    
-    // Adicionar marcadores
-    const originIcon = L.divIcon({
-        className: 'origin-marker',
-        iconSize: [20, 20],
-        html: '<i class="fas fa-play" style="color: white; font-size: 8px; display: flex; align-items: center; justify-content: center; height: 100%;"></i>'
-    });
-    
-    const destinationIcon = L.divIcon({
-        className: 'destination-marker',
-        iconSize: [20, 20],
-        html: '<i class="fas fa-flag-checkered" style="color: white; font-size: 8px; display: flex; align-items: center; justify-content: center; height: 100%;"></i>'
-    });
-    
-    // Marcador de origem
-    L.marker(coordinates.origin, { icon: originIcon })
-        .addTo(routeMap)
-        .bindPopup(`<strong>Origem:</strong> ${route.origem}<br><small>${coordinates.origin[0].toFixed(4)}, ${coordinates.origin[1].toFixed(4)}</small>`);
-    
-    // Marcador de destino
-    L.marker(coordinates.destination, { icon: destinationIcon })
-        .addTo(routeMap)
-        .bindPopup(`<strong>Destino:</strong> ${route.destino}<br><small>${coordinates.destination[0].toFixed(4)}, ${coordinates.destination[1].toFixed(4)}</small>`);
-    
-    // Adicionar linha da rota
-    const routePoints = [coordinates.origin, ...(coordinates.waypoints || []), coordinates.destination];
-    routeLine = L.polyline(routePoints, {
-        color: '#1E355F',
-        weight: 4,
-        opacity: 0.7,
-        dashArray: '5, 10'
-    }).addTo(routeMap);
-    
-    // Ajustar o zoom para mostrar toda a rota
-    routeMap.fitBounds(routeLine.getBounds());
-    
-    // Adicionar veículos em movimento (simulação)
-    addMovingVehicles(route, routePoints);
-    
-    // Adicionar controles de zoom
-    setupMapControls();
-    
-    // Adicionar legenda
-    addMapLegend();
+    showRouteOnMap(route);
+    showNotification(`Acompanhando rota ${routeId}`, 'success');
 }
 
-// Adicionar veículos em movimento no mapa
-function addMovingVehicles(route, routePoints) {
-    const numVehicles = parseInt(route.veiculos) || 1;
+// Mostrar detalhes da rota
+function showRouteDetails(routeId) {
+    const route = routesData.find(r => r.id === routeId);
+    if (!route) return;
     
-    for (let i = 0; i < numVehicles; i++) {
-        // Posição aleatória ao longo da rota
-        const progress = Math.random();
-        const segmentIndex = Math.floor((routePoints.length - 1) * progress);
-        const segmentProgress = (routePoints.length - 1) * progress - segmentIndex;
-        
-        const startPoint = routePoints[segmentIndex];
-        const endPoint = routePoints[segmentIndex + 1];
-        
-        const lat = startPoint[0] + (endPoint[0] - startPoint[0]) * segmentProgress;
-        const lng = startPoint[1] + (endPoint[1] - startPoint[1]) * segmentProgress;
-        
-        const vehicleIcon = L.divIcon({
-            className: 'vehicle-marker',
-            iconSize: [16, 16],
-            html: '<i class="fas fa-truck" style="color: white; font-size: 6px; display: flex; align-items: center; justify-content: center; height: 100%;"></i>'
-        });
-        
-        L.marker([lat, lng], { icon: vehicleIcon })
-            .addTo(routeMap)
-            .bindPopup(`<strong>Veículo ${i + 1}</strong><br>Rota: ${route.nome}<br>Status: Em trânsito`);
-    }
-}
-
-// Configurar controles do mapa
-function setupMapControls() {
-    // Controles de zoom
-    document.getElementById('zoomInBtn').addEventListener('click', () => {
-        routeMap.zoomIn();
-    });
+    // Preencher modal
+    document.getElementById('modal-route-id').textContent = route.id;
+    document.getElementById('modal-vehicle').textContent = route.vehicle;
+    document.getElementById('modal-driver').textContent = route.driver;
+    document.getElementById('modal-status').textContent = getStatusText(route.status);
+    document.getElementById('modal-origin').textContent = route.origin;
+    document.getElementById('modal-destination').textContent = route.destination;
+    document.getElementById('modal-distance').textContent = `${route.distance} km`;
+    document.getElementById('modal-duration').textContent = `${route.duration} minutos`;
+    document.getElementById('modal-start-time').textContent = new Date(route.startTime).toLocaleString('pt-BR');
+    document.getElementById('modal-end-time').textContent = new Date(route.endTime).toLocaleString('pt-BR');
     
-    document.getElementById('zoomOutBtn').addEventListener('click', () => {
-        routeMap.zoomOut();
-    });
+    // Atualizar progresso
+    const progressFill = document.getElementById('modal-progress-fill');
+    const progressText = document.getElementById('modal-progress-text');
+    progressFill.style.width = `${route.progress}%`;
+    progressText.textContent = `${route.progress}%`;
     
-    document.getElementById('resetViewBtn').addEventListener('click', () => {
-        if (routeLine) {
-            routeMap.fitBounds(routeLine.getBounds());
-        }
-    });
-}
-
-// Adicionar legenda do mapa
-function addMapLegend() {
-    const legend = L.control({ position: 'bottomright' });
+    // Preencher pontos de parada
+    const stopsList = document.getElementById('modal-stops-list');
+    stopsList.innerHTML = '';
     
-    legend.onAdd = function(map) {
-        const div = L.DomUtil.create('div', 'map-legend');
-        div.innerHTML = `
-            <div class="legend-item">
-                <div class="legend-color legend-origin"></div>
-                <span>Origem</span>
+    route.stops.forEach((stop, index) => {
+        const stopElement = document.createElement('div');
+        stopElement.className = 'stop-item';
+        stopElement.innerHTML = `
+            <div class="stop-marker">${index + 1}</div>
+            <div class="stop-content">
+                <div class="stop-name">${stop.name}</div>
+                <div class="stop-address">${stop.address}</div>
             </div>
-            <div class="legend-item">
-                <div class="legend-color legend-destination"></div>
-                <span>Destino</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color legend-vehicle"></div>
-                <span>Veículo</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color legend-route"></div>
-                <span>Rota</span>
+            <div class="stop-status ${stop.status}">
+                ${stop.status === 'completed' ? 'Concluído' : 'Pendente'}
             </div>
         `;
-        return div;
-    };
+        stopsList.appendChild(stopElement);
+    });
     
-    legend.addTo(routeMap);
-}
-
-// Preencher detalhes da rota
-function populateRouteDetails(routeId) {
-    const route = routeData[routeId];
-    if (!route) {
-        console.error('Rota não encontrada:', routeId);
-        return;
+    // Configurar botão de acompanhar
+    const trackBtn = document.getElementById('trackRoute');
+    if (route.status === 'active') {
+        trackBtn.style.display = 'flex';
+        trackBtn.onclick = () => {
+            trackRoute(routeId);
+            closeModal();
+        };
+    } else {
+        trackBtn.style.display = 'none';
     }
     
-    console.log('Preenchendo detalhes para:', routeId);
-    
-    // Preencher informações da rota
-    document.getElementById('detail-nome').textContent = route.nome;
-    document.getElementById('detail-origem').textContent = route.origem;
-    document.getElementById('detail-destino').textContent = route.destino;
-    document.getElementById('detail-distancia').textContent = route.distancia;
-    document.getElementById('detail-tempo').textContent = route.tempo;
-    document.getElementById('detail-veiculos').textContent = route.veiculos;
-    document.getElementById('detail-entregas').textContent = route.entregas;
-    document.getElementById('detail-consumo').textContent = route.consumo;
-    document.getElementById('detail-motorista-principal').textContent = route.motoristaPrincipal;
-    document.getElementById('detail-motorista-suplentes').textContent = route.motoristaSuplentes;
-    document.getElementById('detail-primeira-saida').textContent = route.primeiraSaida;
-    document.getElementById('detail-ultima-saida').textContent = route.ultimaSaida;
-    document.getElementById('detail-frequencia').textContent = route.frequencia;
-    
-    // Preencher informações de temperatura
-    document.getElementById('detail-temp-media').innerHTML = `<span class="temp-indicator temp-${route.temperatura.status}"></span> ${route.temperatura.media}`;
-    document.getElementById('detail-temp-range').textContent = route.temperatura.range;
-    document.getElementById('detail-temp-update').textContent = route.temperatura.ultimaAtualizacao;
-    
-    // Atualizar status de temperatura
-    const tempStatusElement = document.getElementById('detail-temp-status');
-    tempStatusElement.innerHTML = '';
-    const tempStatusSpan = document.createElement('span');
-    tempStatusSpan.className = `status ${route.temperatura.status}`;
-    tempStatusSpan.textContent = route.temperatura.status === 'normal' ? 'Normal' : route.temperatura.status === 'warning' ? 'Atenção' : 'Crítico';
-    tempStatusElement.appendChild(tempStatusSpan);
-    
-    // Atualizar status da rota
-    const statusElement = document.getElementById('detail-status');
-    statusElement.innerHTML = '';
-    const statusSpan = document.createElement('span');
-    statusSpan.className = `status ${route.status}`;
-    statusSpan.textContent = route.status === 'active' ? 'Ativa' : 'Inativa';
-    statusElement.appendChild(statusSpan);
-    
-    // Renderizar sensores
-    renderSensors(route.sensores);
-    
-    // Atualizar título do modal
-    document.querySelector('#routeDetailsModal .modal-title').textContent = `Detalhes da Rota - ${route.nome}`;
-    
-    // Inicializar mapa
-    setTimeout(() => {
-        initMap(routeId);
-    }, 100);
+    // Mostrar modal
+    document.getElementById('routeModal').classList.add('active');
 }
 
-// Salvar rota
-function saveRoute() {
-    const form = document.getElementById('addRouteForm');
-    const formData = new FormData(form);
+// Fechar modal
+function closeModal() {
+    document.getElementById('routeModal').classList.remove('active');
+}
+
+// Mostrar modal de nova rota
+function showNewRouteModal() {
+    // Preencher data/hora padrão (próxima hora)
+    const now = new Date();
+    const nextHour = new Date(now.getTime() + 60 * 60 * 1000);
+    nextHour.setMinutes(0, 0, 0);
     
-    // Validar formulário
-    if (!form.checkValidity()) {
-        alert('Por favor, preencha todos os campos obrigatórios.');
-        return;
+    document.getElementById('routeStart').value = nextHour.toISOString().slice(0, 16);
+    
+    // Mostrar modal
+    document.getElementById('newRouteModal').classList.add('active');
+}
+
+// Fechar modal de nova rota
+function closeNewRouteModal() {
+    document.getElementById('newRouteModal').classList.remove('active');
+    document.getElementById('newRouteForm').reset();
+    
+    // Limpar pontos de parada adicionais
+    const stopsContainer = document.getElementById('stopsContainer');
+    while (stopsContainer.children.length > 1) {
+        stopsContainer.removeChild(stopsContainer.lastChild);
     }
+}
+
+// Configurar event listeners
+function setupEventListeners() {
+    // Fechar modais
+    const modalClose = document.querySelectorAll('.modal-close');
+    const modalOverlays = document.querySelectorAll('.modal-overlay');
     
-    // Criar nova rota
-    const newRouteId = Object.keys(routeData).length + 1;
+    modalClose.forEach(closeBtn => {
+        closeBtn.addEventListener('click', (e) => {
+            const modal = e.target.closest('.modal-overlay');
+            modal.classList.remove('active');
+        });
+    });
+    
+    modalOverlays.forEach(overlay => {
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                overlay.classList.remove('active');
+            }
+        });
+    });
+    
+    // Controles do mapa
+    document.getElementById('zoomIn').addEventListener('click', () => {
+        map.zoomIn();
+    });
+    
+    document.getElementById('zoomOut').addEventListener('click', () => {
+        map.zoomOut();
+    });
+    
+    document.getElementById('locateMe').addEventListener('click', () => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                const { latitude, longitude } = position.coords;
+                map.setView([latitude, longitude], 13);
+            });
+        }
+    });
+    
+    // Formulário nova rota
+    document.getElementById('newRouteForm').addEventListener('submit', createNewRoute);
+    document.getElementById('addStopBtn').addEventListener('click', addStopField);
+}
+
+// Adicionar campo de ponto de parada
+function addStopField() {
+    const stopsContainer = document.getElementById('stopsContainer');
+    const stopCount = stopsContainer.children.length;
+    
+    const stopItem = document.createElement('div');
+    stopItem.className = 'stop-item';
+    stopItem.innerHTML = `
+        <input type="text" class="form-control stop-input" placeholder="Endereço do ponto de parada" required>
+        <button type="button" class="btn-remove-stop">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    
+    stopsContainer.appendChild(stopItem);
+    
+    // Adicionar evento de remover
+    const removeBtn = stopItem.querySelector('.btn-remove-stop');
+    removeBtn.addEventListener('click', () => {
+        stopsContainer.removeChild(stopItem);
+    });
+    
+    // Habilitar botão de remover do primeiro item se houver mais de um
+    if (stopsContainer.children.length > 1) {
+        const firstRemoveBtn = stopsContainer.children[0].querySelector('.btn-remove-stop');
+        firstRemoveBtn.disabled = false;
+    }
+}
+
+// Criar nova rota
+function createNewRoute(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const stops = Array.from(document.querySelectorAll('.stop-input'))
+        .map(input => input.value)
+        .filter(value => value.trim() !== '');
+    
+    // Gerar ID único para nova rota
+    const newRouteId = 'RT' + String(routesData.length + 1).padStart(3, '0');
+    
     const newRoute = {
-        nome: document.getElementById('route-name').value,
-        origem: document.getElementById('origin').value,
-        destino: document.getElementById('destination').value,
-        distancia: document.getElementById('distance').value + ' km',
-        tempo: document.getElementById('time').value + ' minutos',
-        veiculos: Math.floor(Math.random() * 5) + 1 + ' veículos',
-        entregas: Math.floor(Math.random() * 30) + 10 + '',
-        consumo: (Math.random() * 2 + 6).toFixed(1) + ' km/L',
-        status: document.getElementById('route-status').value,
-        motoristaPrincipal: "Novo Motorista",
-        motoristaSuplentes: "Suplente 1, Suplente 2",
-        primeiraSaida: "06:00",
-        ultimaSaida: "14:00",
-        frequencia: "A cada 2 horas",
-        temperatura: {
-            media: (Math.random() * 8 + 2).toFixed(1) + '°C',
-            status: "normal",
-            range: "2°C a 5°C",
-            ultimaAtualizacao: new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})
-        },
-        sensores: [
-            { name: "Sensor Principal", value: (Math.random() * 8 + 2).toFixed(1) + '°C', status: "normal", location: "Centro da carga" },
-            { name: "Sensor da Porta", value: (Math.random() * 8 + 2).toFixed(1) + '°C', status: "normal", location: "Perto da porta" }
-        ]
+        id: newRouteId,
+        vehicle: document.getElementById('routeVehicle').value,
+        driver: document.getElementById('routeDriver').value,
+        status: 'scheduled',
+        origin: document.getElementById('routeOrigin').value,
+        destination: document.getElementById('routeDestination').value,
+        distance: Math.round(Math.random() * 50 + 10), // Distância aleatória para exemplo
+        duration: Math.round(Math.random() * 60 + 20), // Duração aleatória para exemplo
+        progress: 0,
+        startTime: new Date(document.getElementById('routeStart').value),
+        endTime: new Date(new Date(document.getElementById('routeStart').value).getTime() + 60 * 60 * 1000), // +1 hora
+        currentLocation: null,
+        stops: stops.map((stop, index) => ({
+            name: `Parada ${index + 1}`,
+            address: stop,
+            status: 'pending'
+        })),
+        temperatureStatus: 'normal',
+        priority: document.getElementById('routePriority').value,
+        description: document.getElementById('routeDescription').value
     };
     
-    // Adicionar à lista de rotas
-    routeData[newRouteId] = newRoute;
-    
-    // Fechar modal e atualizar tabela
-    closeModal(document.getElementById('addRouteModal'));
-    
-    // Limpar formulário
-    form.reset();
+    // Adicionar nova rota
+    routesData.unshift(newRoute);
     
     // Atualizar interface
-    currentPage = 1;
-    populateRoutesTable();
-    setupPagination();
+    updateSummaryCards();
+    displayRoutes();
     
-    alert(`Rota "${newRoute.nome}" adicionada com sucesso!`);
-}
-
-// Editar rota
-function editRoute(routeId = null) {
-    if (routeId) {
-        // Editar rota específica
-        const route = routeData[routeId];
-        alert(`Editando rota: ${route.nome}`);
-    } else {
-        // Editar rota do modal de detalhes
-        const routeName = document.getElementById('detail-nome').textContent;
-        alert(`Editando rota: ${routeName}`);
-    }
-}
-
-// Excluir rota
-function deleteRoute(routeId) {
-    const route = routeData[routeId];
-    if (!route) return;
+    // Fechar modal e mostrar confirmação
+    closeNewRouteModal();
+    showNotification('Rota criada com sucesso!', 'success');
     
-    if (confirm(`Tem certeza que deseja excluir a rota "${route.nome}"?`)) {
-        delete routeData[routeId];
-        populateRoutesTable();
-        setupPagination();
-        alert(`Rota "${route.nome}" excluída com sucesso!`);
-    }
-}
-
-// Exportar dados
-function exportData() {
-    const dataStr = JSON.stringify(routeData, null, 2);
-    const dataBlob = new Blob([dataStr], {type: 'application/json'});
-    
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'rotasystem-rotas.json';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    
-    alert('Dados exportados com sucesso!');
+    console.log('Nova rota criada:', newRoute);
 }
 
 // Atualizar dados
-function refreshData() {
-    location.reload();
+async function refreshData() {
+    showLoading();
+    try {
+        await loadRoutesData();
+        updateSummaryCards();
+        displayRoutes();
+        updateMap();
+        hideLoading();
+        showNotification('Dados atualizados com sucesso!', 'success');
+    } catch (error) {
+        console.error('Erro ao atualizar dados:', error);
+        hideLoading();
+        showNotification('Erro ao atualizar dados', 'error');
+    }
 }
 
-// Dados de fallback em caso de erro no carregamento do JSON
-function getFallbackData() {
-    console.log('Usando dados de fallback para rotas');
-    return {
-        "dashboard": {
-            "totalVehicles": 5,
-            "avgTemperature": 4.9,
-            "activeAlerts": 1,
-            "fuelEconomy": 7.8,
-            "fuelTarget": 8.2
-        },
-        "vehicles": []
-    };
+// Mostrar notificação
+function showNotification(message, type = 'info') {
+    // Criar elemento de notificação
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <div class="notification-content">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'}"></i>
+            <span>${message}</span>
+        </div>
+        <button class="notification-close">&times;</button>
+    `;
+    
+    // Adicionar ao body
+    document.body.appendChild(notification);
+    
+    // Mostrar com animação
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 100);
+    
+    // Auto-remover após 5 segundos
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    }, 5000);
+    
+    // Evento de fechar
+    const closeBtn = notification.querySelector('.notification-close');
+    closeBtn.addEventListener('click', () => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    });
 }
+
+// Atualização em tempo real
+function startRealTimeUpdates() {
+    setInterval(async () => {
+        try {
+            console.log('Atualizando rotas em tempo real...');
+            
+            // Simular atualização de localização para rotas ativas
+            routesData.forEach(route => {
+                if (route.status === 'active' && route.currentLocation) {
+                    // Pequena variação na localização para simular movimento
+                    const latVariation = (Math.random() - 0.5) * 0.01;
+                    const lngVariation = (Math.random() - 0.5) * 0.01;
+                    
+                    route.currentLocation[0] += latVariation;
+                    route.currentLocation[1] += lngVariation;
+                    
+                    // Atualizar progresso
+                    if (route.progress < 100) {
+                        route.progress = Math.min(100, route.progress + Math.random() * 5);
+                    }
+                }
+            });
+            
+            updateSummaryCards();
+            displayRoutes();
+            updateMap();
+            
+        } catch (error) {
+            console.error('Erro na atualização em tempo real:', error);
+        }
+    }, 30000); // Atualizar a cada 30 segundos
+}
+
+// Iniciar atualizações em tempo real após um delay
+setTimeout(startRealTimeUpdates, 10000);
+
+// Adicionar estilos para notificações
+const notificationStyles = document.createElement('style');
+notificationStyles.textContent = `
+    .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        padding: 15px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        min-width: 300px;
+        max-width: 400px;
+        transform: translateX(400px);
+        opacity: 0;
+        transition: all 0.3s ease;
+        z-index: 10000;
+        border-left: 4px solid var(--info);
+    }
+    
+    .notification.show {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    
+    .notification-success {
+        border-left-color: var(--accent4);
+    }
+    
+    .notification-error {
+        border-left-color: var(--accent2);
+    }
+    
+    .notification-content {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex: 1;
+    }
+    
+    .notification-success .notification-content i {
+        color: var(--accent4);
+    }
+    
+    .notification-error .notification-content i {
+        color: var(--accent2);
+    }
+    
+    .notification-close {
+        background: none;
+        border: none;
+        font-size: 18px;
+        cursor: pointer;
+        color: var(--gray);
+        padding: 0;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .no-routes {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 20px;
+        color: var(--gray);
+        text-align: center;
+    }
+    
+    .map-popup {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-size: 14px;
+        line-height: 1.4;
+    }
+    
+    .map-popup strong {
+        color: var(--primary);
+    }
+`;
+
+document.head.appendChild(notificationStyles);

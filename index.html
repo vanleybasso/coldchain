@@ -4,192 +4,216 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RotaSystem - Sistema de Telemetria de Frios</title>
+     <!-- Favicon da empresa -->
+    <link rel="icon" type="image/x-icon" href="/rotasystem.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="./styles/index.css">
     <!-- Adicionar Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* Estilos da tela de login */
-        .login-container {
+        /* Loading Overlay Global - SIMPLIFICADO */
+        .loading-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            background-color: rgba(255, 255, 255, 0.95);
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 9999;
-            transition: opacity 0.5s ease;
+            flex-direction: column;
+            transition: opacity 0.3s ease;
         }
 
-        .login-container.hidden {
+        .loading-overlay.hidden {
             opacity: 0;
             pointer-events: none;
         }
 
-        .login-box {
-            background: var(--white);
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            width: 100%;
-            max-width: 400px;
-            padding: 40px 30px;
-            text-align: center;
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(46, 167, 173, 0.2);
+            border-radius: 50%;
+            border-top: 4px solid var(--secondary);
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
         }
 
-        .login-logo {
-            margin-bottom: 30px;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
-        .login-logo img {
-            max-width: 50px;
-            height: auto;
-        }
-
-        .login-title {
-            color: var(--primary);
-            margin-bottom: 25px;
-            font-size: 24px;
+        .loading-title {
+            font-size: 18px;
             font-weight: 600;
-        }
-
-        .login-form {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .form-group {
-            text-align: left;
-            position: relative;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: var(--primary);
-            font-weight: 500;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-            padding-right: 45px;
-        }
-
-        .form-control:focus {
-            border-color: var(--secondary);
-            outline: none;
-        }
-
-        .password-toggle {
-            position: absolute;
-            right: 15px;
-            top: 38px;
-            background: none;
-            border: none;
-            color: #777;
-            cursor: pointer;
-            font-size: 16px;
-            transition: color 0.3s;
-        }
-
-        .password-toggle:hover {
             color: var(--secondary);
         }
 
-        .login-btn {
-            background-color: var(--primary);
-            color: var(--white);
-            border: none;
+        /* Melhorias de responsividade */
+        @media (max-width: 768px) {
+            .loading-spinner {
+                width: 50px;
+                height: 50px;
+            }
+
+            .loading-title {
+                font-size: 16px;
+            }
+        }
+
+        /* Spinners e estados de carregamento */
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 3px solid #fff;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        .card-loading {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-loading::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .table-loading {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .table-loading::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+            animation: shimmer 1.5s infinite;
+        }
+
+        .chart-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 300px;
+            background-color: #f8f9fa;
             border-radius: 5px;
-            padding: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            margin-top: 10px;
         }
 
-        .login-btn:hover {
-            background-color: #152547;
-        }
-
-        .login-error {
-            color: var(--accent2);
-            margin-top: 10px;
-            font-size: 14px;
+        .loading-content {
             display: none;
         }
 
-        .login-error.show {
+        .content-loaded .loading-content {
             display: block;
         }
 
-        .login-footer {
-            margin-top: 20px;
-            font-size: 14px;
-            color: #777;
+        .content-loaded .loading-placeholder {
+            display: none;
         }
     </style>
 </head>
 <body>
-    <!-- Tela de Login -->
-    <div class="login-container" id="loginContainer">
-        <div class="login-box">
-            <div class="login-logo">
-                <img src="/rotasystem.png" alt="RotaSystem Logo">
-            </div>
-            <h2 class="login-title">Acesso ao Sistema</h2>
-            <form class="login-form" id="loginForm">
-                <div class="form-group">
-                    <label for="username">Usuário</label>
-                    <input type="text" id="username" class="form-control" placeholder="Digite seu usuário" required>
-                </div>
-                <div class="form-group">
-                    <label for="password">Senha</label>
-                    <input type="password" id="password" class="form-control" placeholder="Digite sua senha" required>
-                    <button type="button" class="password-toggle" id="passwordToggle">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                </div>
-                <div class="login-error" id="loginError">
-                    Usuário ou senha incorretos. Tente novamente.
-                </div>
-                <button type="submit" class="login-btn">Entrar</button>
-            </form>
-            <div class="login-footer">
-                Sistema de Telemetria de Frios
-            </div>
-        </div>
+    <!-- Loading Overlay Global - SIMPLIFICADO -->
+    <div class="loading-overlay" id="globalLoading">
+        <div class="loading-spinner"></div>
+        <div class="loading-title">Carregando Dashboard</div>
     </div>
 
-    <!-- Conteúdo principal (inicialmente oculto) -->
-    <div class="container" id="mainContainer" style="display: none;">
-        <!-- Sidebar -->
+    <!-- Conteúdo principal -->
+    <div class="container" id="mainContainer">
+        <!-- Sidebar Modernizado e Fixo -->
         <aside class="sidebar">
-            <div class="logo">
-                <img src="/logo.png" alt="RotaSystem Logo">
-            </div>
-            
-            <ul class="menu">
-                <li><a href="index.html" class="active"><i class="fas fa-home"></i> Dashboard</a></li>
-                <li><a href="veiculos.html"><i class="fas fa-truck"></i> Veículos</a></li>
-                <li><a href="rotas.html"><i class="fas fa-route"></i> Rotas</a></li>
-                <li><a href="temperaturas.html"><i class="fas fa-thermometer-half"></i> Temperaturas</a></li>
-                <li><a href="alertas.html"><i class="fas fa-exclamation-triangle"></i> Alertas</a></li>
-                <li><a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Sair</a></li>
-            </ul>
-            
-            <!-- Nova logo adicionada no final do sidebar -->
-            <div class="logo-bottom">
-                <img src="niju.png" alt="Niju Logo" class="bottom-logo">
+            <div class="sidebar-content">
+                <div class="logo-container">
+                    <div class="logo">
+                        <img src="/logo.png" alt="RotaSystem Logo">
+                    </div>
+                    <div class="logo-glow"></div>
+                </div>
+                
+                <ul class="menu">
+                    <li>
+                        <a href="index.html" class="menu-item active">
+                            <div class="menu-icon">
+                                <i class="fas fa-home"></i>
+                            </div>
+                            <span class="menu-text">Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="veiculos.html" class="menu-item">
+                            <div class="menu-icon">
+                                <i class="fas fa-truck"></i>
+                            </div>
+                            <span class="menu-text">Veículos</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="rotas.html" class="menu-item">
+                            <div class="menu-icon">
+                                <i class="fas fa-route"></i>
+                            </div>
+                            <span class="menu-text">Rotas</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="temperaturas.html" class="menu-item">
+                            <div class="menu-icon">
+                                <i class="fas fa-thermometer-half"></i>
+                            </div>
+                            <span class="menu-text">Temperaturas</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="alertas.html" class="menu-item">
+                            <div class="menu-icon">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <span class="menu-text">Alertas</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="menu-item logout-item" id="logoutBtn">
+                            <div class="menu-icon">
+                                <i class="fas fa-sign-out-alt"></i>
+                            </div>
+                            <span class="menu-text">Sair</span>
+                        </a>
+                    </li>
+                    
+                    <!-- Logo da Niju APÓS o botão Sair -->
+                    <li class="niju-menu-item">
+                        <div class="niju-logo-container">
+                            <div class="niju-logo">
+                                <img src="niju.png" alt="Niju Logo">
+                            </div>
+                        </div>
+                    </li>
+                </ul>
             </div>
         </aside>
                 
@@ -201,60 +225,72 @@
                     <h2>Dashboard - Telemetria de Frios</h2>
                 </div>
                 <div class="user-info">
-                    <img src="https://ui-avatars.com/api/?name=Operador&background=2EA7AD&color=fff" alt="User">
-                    <span>Operador</span>
+                    <img src="./rotasystem.png" alt="Rota System Logo" class="company-logo">
+                    <span>Rota System</span>
                 </div>
             </div>
             
             <!-- Dashboard Cards -->
             <div class="dashboard-cards">
-                <div class="card">
+                <div class="card card-loading">
                     <div class="card-header">
                         <div class="card-title">Frota Monitorada</div>
                         <div class="card-icon temp">
                             <i class="fas fa-truck"></i>
                         </div>
                     </div>
-                    <div class="card-value" id="total-vehicles">-</div>
+                    <div class="card-value" id="total-vehicles">
+                        <div class="loading-placeholder">-</div>
+                        <div class="loading-content">-</div>
+                    </div>
                     <div class="card-footer">
                         <a href="veiculos.html" style="color: var(--secondary); text-decoration: none; font-weight: 500;">Ver mais</a>
                     </div>
                 </div>
                 
-                <div class="card">
+                <div class="card card-loading">
                     <div class="card-header">
                         <div class="card-title">Temperatura Média</div>
                         <div class="card-icon temp">
                             <i class="fas fa-thermometer-half"></i>
                         </div>
                     </div>
-                    <div class="card-value" id="avg-temperature">-</div>
+                    <div class="card-value" id="avg-temperature">
+                        <div class="loading-placeholder">-</div>
+                        <div class="loading-content">-</div>
+                    </div>
                     <div class="card-footer">
                         <a href="temperaturas.html" style="color: var(--secondary); text-decoration: none; font-weight: 500;">Ver mais</a>
                     </div>
                 </div>
                 
-                <div class="card">
+                <div class="card card-loading">
                     <div class="card-header">
                         <div class="card-title">Alertas Ativos</div>
                         <div class="card-icon alert">
                             <i class="fas fa-exclamation-triangle"></i>
                         </div>
                     </div>
-                    <div class="card-value" id="active-alerts">-</div>
+                    <div class="card-value" id="active-alerts">
+                        <div class="loading-placeholder">-</div>
+                        <div class="loading-content">-</div>
+                    </div>
                     <div class="card-footer">
                         <a href="alertas.html" style="color: var(--secondary); text-decoration: none; font-weight: 500;">Ver mais</a>
                     </div>
                 </div>
                 
-                <div class="card">
+                <div class="card card-loading">
                     <div class="card-header">
                         <div class="card-title">Economia de Combustível</div>
                         <div class="card-icon ok">
                             <i class="fas fa-gas-pump"></i>
                         </div>
                     </div>
-                    <div class="card-value" id="fuel-economy">-</div>
+                    <div class="card-value" id="fuel-economy">
+                        <div class="loading-placeholder">-</div>
+                        <div class="loading-content">-</div>
+                    </div>
                     <div class="card-footer">
                         <span>Meta: 8.2 km/L</span>
                         <span class="status warning" id="fuel-variation">-</span>
@@ -266,53 +302,63 @@
             <div class="charts-container">
                 <div class="chart">
                     <div class="chart-header">
-                        <div class="chart-title">Temperatura por Veículo</div>
-                        <button class="btn btn-primary">Ver Detalhes</button>
+                        <div class="chart-title">Temperatura Média da Frota - Últimas 12h</div>
+                        <button class="btn btn-primary" onclick="window.location.href='temperaturas.html'">Ver Detalhes</button>
                     </div>
                     <div class="chart-placeholder">
-                        <canvas id="temperatureChart"></canvas>
+                        <div class="chart-loading">
+                            <div class="spinner" style="border-top-color: var(--primary);"></div>
+                        </div>
+                        <canvas id="temperatureChart" style="display: none;"></canvas>
                     </div>
                 </div>
                 
                 <div class="chart">
                     <div class="chart-header">
                         <div class="chart-title">Status da Frota</div>
-                        <button class="btn btn-primary">Filtrar</button>
+                        <button class="btn btn-primary" onclick="window.location.href='veiculos.html'">Ver Frota</button>
                     </div>
                     <div class="chart-placeholder">
-                        <canvas id="statusChart"></canvas>
+                        <div class="chart-loading">
+                            <div class="spinner" style="border-top-color: var(--primary);"></div>
+                        </div>
+                        <canvas id="statusChart" style="display: none;"></canvas>
                     </div>
                 </div>
             </div>
             
-            <!-- Vehicle List -->
-            <div class="vehicle-list">
-                <div class="list-header">
-                    <div class="list-title">Veículos com Monitoramento de Temperatura</div>
-                    <div>
-                        <button class="btn btn-primary" onclick="window.location.href='veiculos.html'" style="margin-right: 10px;">
-                            Ver Todos
-                        </button>
-                        <button class="btn btn-secondary" id="export-btn">Exportar</button>
-                    </div>
-                </div>
-                
-                <table class="vehicle-table">
-                    <thead>
-                        <tr>
-                            <th>Veículo</th>
-                            <th>Motorista</th>
-                            <th>Rota</th>
-                            <th>Temperatura Média</th>
-                            <th>Status</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="vehicle-table-body">
-                        <!-- Os dados serão carregados via JavaScript -->
-                    </tbody>
-                </table>
-            </div>
+            <!-- Vehicle List - IDÊNTICA À VEICULOS.HTML SEM PAGINAÇÃO -->
+<div class="vehicle-list">
+    <div class="list-header">
+        <div class="list-title">Veículos com Monitoramento de Temperatura</div>
+        <div id="vehicleCount">
+            <div class="loading-placeholder">Carregando...</div>
+            <div class="loading-content" style="display: none;">-</div>
+        </div>
+    </div>
+    
+    <table class="vehicle-table table-loading">
+        <thead>
+            <tr>
+                <th>Placa</th>
+                <th>Modelo</th>
+                <th>Motorista</th>
+                <th>Rota</th>
+                <th>Temperatura</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody id="vehicle-table-body">
+            <tr>
+                <td colspan="7" style="text-align: center; padding: 30px;">
+                    <div class="loading-spinner" style="width: 30px; height: 30px; margin: 0 auto;"></div>
+                    <div style="margin-top: 10px; color: #2EA7AD;">Carregando dados dos veículos...</div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
         </main>
     </div>
 
@@ -326,7 +372,7 @@
             <div class="modal-body">
                 <div class="vehicle-details">
                     <div class="detail-group">
-                        <div class="detail-label">Veículo</div>
+                        <div class="detail-label">Placa</div>
                         <div class="detail-value" id="modal-vehicle">-</div>
                     </div>
                     <div class="detail-group">
@@ -350,12 +396,12 @@
                         <div class="detail-value" id="modal-update">-</div>
                     </div>
                     <div class="detail-group">
-                        <div class="detail-label">Velocidade</div>
-                        <div class="detail-value" id="modal-speed">-</div>
+                        <div class="detail-label">Sensores Ativos</div>
+                        <div class="detail-value" id="modal-sensors-count">-</div>
                     </div>
                     <div class="detail-group">
-                        <div class="detail-label">Combustível</div>
-                        <div class="detail-value" id="modal-fuel">-</div>
+                        <div class="detail-label">Status Porta</div>
+                        <div class="detail-value" id="modal-door-status">-</div>
                     </div>
                 </div>
                 
@@ -363,110 +409,74 @@
                     <h4 class="history-title">Leituras de Todos os Sensores</h4>
                     <div class="sensors-grid" id="modal-sensors">
                         <!-- Os dados dos sensores serão inseridos via JavaScript -->
+                        <div class="sensor-card">
+                            <div class="spinner" style="border-top-color: var(--primary);"></div>
+                            <div>Carregando sensores...</div>
+                        </div>
                     </div>
                 </div>
                 
                 <div class="temperature-history">
-                    <h4 class="history-title">Histórico de Temperatura (últimas 24h)</h4>
+                    <h4 class="history-title">Histórico de Temperatura (últimas 12h)</h4>
                     <div class="history-chart">
-                        <canvas id="historyChart"></canvas>
+                        <div class="chart-loading">
+                            <div class="spinner" style="border-top-color: var(--primary);"></div>
+                        </div>
+                        <canvas id="historyChart" style="display: none;"></canvas>
                     </div>
-                    
-                    <table class="history-table">
-                        <thead>
-                            <tr>
-                                <th>Horário</th>
-                                <th>Temperatura Média</th>
-                                <th>Status</th>
-                                <th>Localização</th>
-                            </tr>
-                        </thead>
-                        <tbody id="modal-history">
-                            <!-- Os dados do histórico serão inseridos via JavaScript -->
-                        </tbody>
-                    </table>
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-primary" id="modal-report">Gerar Relatório</button>
+                <button class="btn btn-secondary" onclick="closeModal()">Fechar</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Sistema de Login
-        document.addEventListener('DOMContentLoaded', function() {
-            const loginContainer = document.getElementById('loginContainer');
-            const mainContainer = document.getElementById('mainContainer');
-            const loginForm = document.getElementById('loginForm');
-            const loginError = document.getElementById('loginError');
-            const logoutBtn = document.getElementById('logoutBtn');
-            const passwordToggle = document.getElementById('passwordToggle');
-            const passwordInput = document.getElementById('password');
-            
-            // Verificar se o usuário já está logado
-            if (localStorage.getItem('loggedIn') === 'true') {
-                loginContainer.classList.add('hidden');
-                mainContainer.style.display = 'grid';
+        // Sistema de Loading SIMPLIFICADO
+        function showLoading() {
+            const loadingOverlay = document.getElementById('globalLoading');
+            if (loadingOverlay) {
+                loadingOverlay.classList.remove('hidden');
             }
+        }
+
+        function hideLoading() {
+            const loadingOverlay = document.getElementById('globalLoading');
+            if (loadingOverlay) {
+                loadingOverlay.classList.add('hidden');
+            }
+        }
+
+        // Inicialização da aplicação - RÁPIDA
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('DOM carregado, inicializando aplicação...');
             
-            // Alternar visibilidade da senha
-            passwordToggle.addEventListener('click', function() {
-                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                passwordInput.setAttribute('type', type);
-                
-                // Alterar ícone
-                if (type === 'text') {
-                    passwordToggle.innerHTML = '<i class="fas fa-eye-slash"></i>';
-                } else {
-                    passwordToggle.innerHTML = '<i class="fas fa-eye"></i>';
-                }
-            });
+            // Mostrar loading imediatamente
+            showLoading();
             
-            // Processar o formulário de login
-            loginForm.addEventListener('submit', function(e) {
-                e.preventDefault();
+            try {
+                // Inicializar dashboard rapidamente
+                await initializeDashboard();
                 
-                const username = document.getElementById('username').value;
-                const password = document.getElementById('password').value;
-                
-                // Verificar credenciais
-                if (username === 'rotasystem' && password === '123456') {
-                    // Login bem-sucedido
-                    loginError.classList.remove('show');
-                    localStorage.setItem('loggedIn', 'true');
-                    
-                    // Fazer transição para o dashboard
-                    loginContainer.classList.add('hidden');
-                    setTimeout(() => {
-                        loginContainer.style.display = 'none';
-                        mainContainer.style.display = 'grid';
-                    }, 500);
-                } else {
-                    // Login falhou
-                    loginError.classList.add('show');
-                }
-            });
-            
-            // Logout
-            logoutBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                localStorage.removeItem('loggedIn');
-                mainContainer.style.display = 'none';
-                loginContainer.style.display = 'flex';
+                // Esconder loading após carregamento
                 setTimeout(() => {
-                    loginContainer.classList.remove('hidden');
-                }, 10);
+                    hideLoading();
+                }, 800);
                 
-                // Limpar formulário
-                document.getElementById('username').value = '';
-                document.getElementById('password').value = '';
-                loginError.classList.remove('show');
-                
-                // Resetar ícone do olho
-                passwordInput.setAttribute('type', 'password');
-                passwordToggle.innerHTML = '<i class="fas fa-eye"></i>';
-            });
+            } catch (error) {
+                console.error('Erro na inicialização:', error);
+                // Em caso de erro, esconder o loading também
+                hideLoading();
+            }
+        });
+
+        // Botão Sair - Redireciona para a página inicial
+        document.getElementById('logoutBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            // Aqui você pode adicionar qualquer lógica de logout se necessário
+            window.location.href = 'index.html';
         });
     </script>
     <script src="./scripts/index.js"></script>
