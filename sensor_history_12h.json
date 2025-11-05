@@ -3,31 +3,6 @@
     {
       "temperature": 23.5,
       "humidity": 0.0,
-      "timestamp": "2025-11-05T02:16:28-03:00"
-    },
-    {
-      "temperature": 23.5,
-      "humidity": 0.0,
-      "timestamp": "2025-11-05T02:19:28-03:00"
-    },
-    {
-      "temperature": 23.5,
-      "humidity": 0.0,
-      "timestamp": "2025-11-05T02:22:28-03:00"
-    },
-    {
-      "temperature": 23.9,
-      "humidity": 0.0,
-      "timestamp": "2025-11-05T02:25:28-03:00"
-    },
-    {
-      "temperature": 23.5,
-      "humidity": 0.0,
-      "timestamp": "2025-11-05T02:28:28-03:00"
-    },
-    {
-      "temperature": 23.5,
-      "humidity": 0.0,
       "timestamp": "2025-11-05T02:31:27-03:00"
     },
     {
@@ -1244,37 +1219,37 @@
       "temperature": 24.5,
       "humidity": 0.0,
       "timestamp": "2025-11-05T14:13:18-03:00"
+    },
+    {
+      "temperature": 24.5,
+      "humidity": 0.0,
+      "timestamp": "2025-11-05T14:16:18-03:00"
+    },
+    {
+      "temperature": 24.2,
+      "humidity": 0.0,
+      "timestamp": "2025-11-05T14:19:18-03:00"
+    },
+    {
+      "temperature": 24.2,
+      "humidity": 0.0,
+      "timestamp": "2025-11-05T14:22:18-03:00"
+    },
+    {
+      "temperature": 24.2,
+      "humidity": 0.0,
+      "timestamp": "2025-11-05T14:25:17-03:00"
+    },
+    {
+      "temperature": 24.2,
+      "humidity": 0.0,
+      "timestamp": "2025-11-05T14:28:17-03:00"
     }
   ],
   "dianteiro-direito": [
     {
       "temperature": 23.7,
       "humidity": 62.0,
-      "timestamp": "2025-11-05T02:16:28-03:00"
-    },
-    {
-      "temperature": 23.7,
-      "humidity": 62.0,
-      "timestamp": "2025-11-05T02:19:28-03:00"
-    },
-    {
-      "temperature": 23.7,
-      "humidity": 62.0,
-      "timestamp": "2025-11-05T02:22:28-03:00"
-    },
-    {
-      "temperature": 23.7,
-      "humidity": 62.0,
-      "timestamp": "2025-11-05T02:25:28-03:00"
-    },
-    {
-      "temperature": 23.7,
-      "humidity": 62.0,
-      "timestamp": "2025-11-05T02:28:28-03:00"
-    },
-    {
-      "temperature": 23.7,
-      "humidity": 62.0,
       "timestamp": "2025-11-05T02:31:27-03:00"
     },
     {
@@ -2491,37 +2466,37 @@
       "temperature": 24.0,
       "humidity": 53.0,
       "timestamp": "2025-11-05T14:13:18-03:00"
+    },
+    {
+      "temperature": 24.1,
+      "humidity": 53.0,
+      "timestamp": "2025-11-05T14:16:18-03:00"
+    },
+    {
+      "temperature": 24.1,
+      "humidity": 53.0,
+      "timestamp": "2025-11-05T14:19:18-03:00"
+    },
+    {
+      "temperature": 24.1,
+      "humidity": 53.0,
+      "timestamp": "2025-11-05T14:22:18-03:00"
+    },
+    {
+      "temperature": 24.1,
+      "humidity": 53.0,
+      "timestamp": "2025-11-05T14:25:17-03:00"
+    },
+    {
+      "temperature": 24.2,
+      "humidity": 54.0,
+      "timestamp": "2025-11-05T14:28:17-03:00"
     }
   ],
   "dianteiro-esquerdo": [
     {
       "temperature": 23.7,
       "humidity": 61.0,
-      "timestamp": "2025-11-05T02:16:28-03:00"
-    },
-    {
-      "temperature": 23.7,
-      "humidity": 61.0,
-      "timestamp": "2025-11-05T02:19:28-03:00"
-    },
-    {
-      "temperature": 23.7,
-      "humidity": 61.0,
-      "timestamp": "2025-11-05T02:22:28-03:00"
-    },
-    {
-      "temperature": 23.7,
-      "humidity": 61.0,
-      "timestamp": "2025-11-05T02:25:28-03:00"
-    },
-    {
-      "temperature": 23.7,
-      "humidity": 61.0,
-      "timestamp": "2025-11-05T02:28:28-03:00"
-    },
-    {
-      "temperature": 23.7,
-      "humidity": 61.0,
       "timestamp": "2025-11-05T02:31:27-03:00"
     },
     {
@@ -3738,37 +3713,37 @@
       "temperature": 24.1,
       "humidity": 51.0,
       "timestamp": "2025-11-05T14:13:18-03:00"
+    },
+    {
+      "temperature": 24.1,
+      "humidity": 51.0,
+      "timestamp": "2025-11-05T14:16:18-03:00"
+    },
+    {
+      "temperature": 24.2,
+      "humidity": 51.0,
+      "timestamp": "2025-11-05T14:19:18-03:00"
+    },
+    {
+      "temperature": 24.2,
+      "humidity": 51.0,
+      "timestamp": "2025-11-05T14:22:18-03:00"
+    },
+    {
+      "temperature": 24.3,
+      "humidity": 51.0,
+      "timestamp": "2025-11-05T14:25:17-03:00"
+    },
+    {
+      "temperature": 24.3,
+      "humidity": 52.0,
+      "timestamp": "2025-11-05T14:28:17-03:00"
     }
   ],
   "central-direito": [
     {
       "temperature": 23.7,
       "humidity": 62.0,
-      "timestamp": "2025-11-05T02:16:28-03:00"
-    },
-    {
-      "temperature": 23.7,
-      "humidity": 62.0,
-      "timestamp": "2025-11-05T02:19:28-03:00"
-    },
-    {
-      "temperature": 23.7,
-      "humidity": 62.0,
-      "timestamp": "2025-11-05T02:22:28-03:00"
-    },
-    {
-      "temperature": 23.7,
-      "humidity": 62.0,
-      "timestamp": "2025-11-05T02:25:28-03:00"
-    },
-    {
-      "temperature": 23.7,
-      "humidity": 62.0,
-      "timestamp": "2025-11-05T02:28:28-03:00"
-    },
-    {
-      "temperature": 23.7,
-      "humidity": 62.0,
       "timestamp": "2025-11-05T02:31:27-03:00"
     },
     {
@@ -4985,37 +4960,37 @@
       "temperature": 24.1,
       "humidity": 52.0,
       "timestamp": "2025-11-05T14:13:18-03:00"
+    },
+    {
+      "temperature": 24.1,
+      "humidity": 52.0,
+      "timestamp": "2025-11-05T14:16:18-03:00"
+    },
+    {
+      "temperature": 24.2,
+      "humidity": 52.0,
+      "timestamp": "2025-11-05T14:19:18-03:00"
+    },
+    {
+      "temperature": 24.2,
+      "humidity": 52.0,
+      "timestamp": "2025-11-05T14:22:18-03:00"
+    },
+    {
+      "temperature": 24.2,
+      "humidity": 52.0,
+      "timestamp": "2025-11-05T14:25:17-03:00"
+    },
+    {
+      "temperature": 24.3,
+      "humidity": 52.0,
+      "timestamp": "2025-11-05T14:28:17-03:00"
     }
   ],
   "central-esquerdo": [
     {
       "temperature": 23.8,
       "humidity": 62.0,
-      "timestamp": "2025-11-05T02:16:28-03:00"
-    },
-    {
-      "temperature": 23.9,
-      "humidity": 62.0,
-      "timestamp": "2025-11-05T02:19:28-03:00"
-    },
-    {
-      "temperature": 23.8,
-      "humidity": 62.0,
-      "timestamp": "2025-11-05T02:22:28-03:00"
-    },
-    {
-      "temperature": 23.8,
-      "humidity": 62.0,
-      "timestamp": "2025-11-05T02:25:28-03:00"
-    },
-    {
-      "temperature": 23.8,
-      "humidity": 62.0,
-      "timestamp": "2025-11-05T02:28:28-03:00"
-    },
-    {
-      "temperature": 23.8,
-      "humidity": 62.0,
       "timestamp": "2025-11-05T02:31:27-03:00"
     },
     {
@@ -6232,37 +6207,37 @@
       "temperature": 24.1,
       "humidity": 52.0,
       "timestamp": "2025-11-05T14:13:18-03:00"
+    },
+    {
+      "temperature": 24.1,
+      "humidity": 52.0,
+      "timestamp": "2025-11-05T14:16:18-03:00"
+    },
+    {
+      "temperature": 24.2,
+      "humidity": 53.0,
+      "timestamp": "2025-11-05T14:19:18-03:00"
+    },
+    {
+      "temperature": 24.2,
+      "humidity": 53.0,
+      "timestamp": "2025-11-05T14:22:18-03:00"
+    },
+    {
+      "temperature": 24.2,
+      "humidity": 53.0,
+      "timestamp": "2025-11-05T14:25:17-03:00"
+    },
+    {
+      "temperature": 24.2,
+      "humidity": 53.0,
+      "timestamp": "2025-11-05T14:28:17-03:00"
     }
   ],
   "fundo-direito": [
     {
       "temperature": 23.7,
       "humidity": 63.0,
-      "timestamp": "2025-11-05T02:16:28-03:00"
-    },
-    {
-      "temperature": 23.7,
-      "humidity": 63.0,
-      "timestamp": "2025-11-05T02:19:28-03:00"
-    },
-    {
-      "temperature": 23.6,
-      "humidity": 63.0,
-      "timestamp": "2025-11-05T02:22:28-03:00"
-    },
-    {
-      "temperature": 23.6,
-      "humidity": 63.0,
-      "timestamp": "2025-11-05T02:25:28-03:00"
-    },
-    {
-      "temperature": 23.7,
-      "humidity": 63.0,
-      "timestamp": "2025-11-05T02:28:28-03:00"
-    },
-    {
-      "temperature": 23.7,
-      "humidity": 63.0,
       "timestamp": "2025-11-05T02:31:27-03:00"
     },
     {
@@ -7479,34 +7454,34 @@
       "temperature": 24.1,
       "humidity": 55.0,
       "timestamp": "2025-11-05T14:13:18-03:00"
+    },
+    {
+      "temperature": 24.1,
+      "humidity": 55.0,
+      "timestamp": "2025-11-05T14:16:18-03:00"
+    },
+    {
+      "temperature": 24.1,
+      "humidity": 55.0,
+      "timestamp": "2025-11-05T14:19:18-03:00"
+    },
+    {
+      "temperature": 24.2,
+      "humidity": 55.0,
+      "timestamp": "2025-11-05T14:22:18-03:00"
+    },
+    {
+      "temperature": 24.2,
+      "humidity": 55.0,
+      "timestamp": "2025-11-05T14:25:17-03:00"
+    },
+    {
+      "temperature": 24.2,
+      "humidity": 55.0,
+      "timestamp": "2025-11-05T14:28:17-03:00"
     }
   ],
   "fundo-esquerdo": [
-    {
-      "temperature": 23.7,
-      "humidity": 62.0,
-      "timestamp": "2025-11-05T02:16:28-03:00"
-    },
-    {
-      "temperature": 23.7,
-      "humidity": 62.0,
-      "timestamp": "2025-11-05T02:19:28-03:00"
-    },
-    {
-      "temperature": 23.7,
-      "humidity": 62.0,
-      "timestamp": "2025-11-05T02:22:28-03:00"
-    },
-    {
-      "temperature": 23.7,
-      "humidity": 62.0,
-      "timestamp": "2025-11-05T02:25:28-03:00"
-    },
-    {
-      "temperature": 23.7,
-      "humidity": 62.0,
-      "timestamp": "2025-11-05T02:28:28-03:00"
-    },
     {
       "temperature": 23.7,
       "humidity": 62.0,
@@ -8726,6 +8701,31 @@
       "temperature": 24.0,
       "humidity": 52.0,
       "timestamp": "2025-11-05T14:13:18-03:00"
+    },
+    {
+      "temperature": 24.0,
+      "humidity": 52.0,
+      "timestamp": "2025-11-05T14:16:18-03:00"
+    },
+    {
+      "temperature": 24.1,
+      "humidity": 52.0,
+      "timestamp": "2025-11-05T14:19:18-03:00"
+    },
+    {
+      "temperature": 24.1,
+      "humidity": 52.0,
+      "timestamp": "2025-11-05T14:22:18-03:00"
+    },
+    {
+      "temperature": 24.1,
+      "humidity": 53.0,
+      "timestamp": "2025-11-05T14:25:17-03:00"
+    },
+    {
+      "temperature": 24.1,
+      "humidity": 53.0,
+      "timestamp": "2025-11-05T14:28:17-03:00"
     }
   ]
 }
