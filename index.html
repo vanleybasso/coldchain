@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RotaSystem - Sistema de Telemetria de Frios</title>
-     <!-- Favicon da empresa -->
+    <!-- Favicon da empresa -->
     <link rel="icon" type="image/x-icon" href="/rotasystem.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="./styles/index.css">
@@ -134,17 +134,200 @@
         .content-loaded .loading-placeholder {
             display: none;
         }
+
+        /* Login Screen Styles */
+        .login-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            transition: opacity 0.5s ease;
+        }
+
+        .login-container.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .login-box {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .login-logo {
+            margin-bottom: 30px;
+        }
+
+        .login-logo img {
+            max-width: 180px;
+            height: auto;
+        }
+
+        .login-title {
+            color: var(--primary);
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .login-subtitle {
+            color: var(--gray);
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+            font-size: 14px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(46, 167, 173, 0.1);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--secondary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .login-btn:hover {
+            background: var(--secondary-dark);
+            transform: translateY(-2px);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .error-message {
+            color: var(--accent2);
+            font-size: 14px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .login-footer {
+            margin-top: 25px;
+            font-size: 12px;
+            color: var(--gray);
+        }
+
+        /* Estilos para o campo de senha com botão de mostrar/esconder */
+        .password-container {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--gray);
+            cursor: pointer;
+            padding: 5px;
+            transition: color 0.3s;
+            z-index: 2;
+        }
+
+        .password-toggle:hover {
+            color: var(--secondary);
+        }
+
+        .password-input {
+            padding-right: 45px !important;
+        }
     </style>
 </head>
 <body>
+    <!-- Tela de Login -->
+    <div class="login-container" id="loginContainer">
+        <div class="login-box">
+            <div class="login-logo">
+                <img src="/logo2.png" alt="RotaSystem Logo">
+            </div>
+            <h2 class="login-title">Acessar o Sistema</h2>
+            <p class="login-subtitle">Faça login para acessar o dashboard</p>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label class="form-label" for="email">E-mail</label>
+                    <input type="email" id="email" class="form-input" placeholder="seu@email.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="password">Senha</label>
+                    <div class="password-container">
+                        <input type="password" id="password" class="form-input password-input" placeholder="Sua senha" required>
+                        <button type="button" class="password-toggle" id="passwordToggle">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="error-message" id="errorMessage">
+                    E-mail ou senha incorretos. Tente novamente.
+                </div>
+                
+                <button type="submit" class="login-btn">
+                    <i class="fas fa-sign-in-alt"></i> Entrar
+                </button>
+            </form>
+            
+            <div class="login-footer">
+                <p>Sistema de Telemetria de Frios - RotaSystem</p>
+            </div>
+        </div>
+    </div>
+
     <!-- Loading Overlay Global - SIMPLIFICADO -->
-    <div class="loading-overlay" id="globalLoading">
+    <div class="loading-overlay hidden" id="globalLoading">
         <div class="loading-spinner"></div>
         <div class="loading-title">Carregando Dashboard</div>
     </div>
 
     <!-- Conteúdo principal -->
-    <div class="container" id="mainContainer">
+    <div class="container hidden" id="mainContainer">
         <!-- Sidebar Modernizado e Fixo -->
         <aside class="sidebar">
             <div class="sidebar-content">
@@ -260,7 +443,7 @@
                         <div class="loading-content">-</div>
                     </div>
                     <div class="card-footer">
-                        <a href="temperaturas.html" style="color: var(--secondary); text-decoration: none; font-weight: 500;">Ver mais</a>
+                        <span style="color: var(--gray); font-size: 12px;">Faixa ideal: -2°C a 10°C</span>
                     </div>
                 </div>
                 
@@ -417,6 +600,82 @@
     </div>
 
     <script>
+        // Sistema de Login
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Sistema de login inicializado');
+            
+            const loginForm = document.getElementById('loginForm');
+            const errorMessage = document.getElementById('errorMessage');
+            const loginContainer = document.getElementById('loginContainer');
+            const mainContainer = document.getElementById('mainContainer');
+            
+            // Verificar se já está logado
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            if (isLoggedIn === 'true') {
+                loginContainer.classList.add('hidden');
+                mainContainer.classList.remove('hidden');
+                initializeApp();
+                return;
+            }
+            
+            // Configurar evento de submit do formulário
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                
+                // Credenciais válidas
+                const validEmail = 'fetranslog@rotasystem.com.br';
+                const validPassword = 'Rota@2025';
+                
+                if (email === validEmail && password === validPassword) {
+                    // Login bem-sucedido
+                    errorMessage.style.display = 'none';
+                    
+                    // Salvar estado de login
+                    localStorage.setItem('isLoggedIn', 'true');
+                    
+                    // Transição suave para o dashboard
+                    loginContainer.classList.add('hidden');
+                    setTimeout(() => {
+                        mainContainer.classList.remove('hidden');
+                        initializeApp();
+                    }, 500);
+                    
+                } else {
+                    // Login falhou
+                    errorMessage.style.display = 'block';
+                    document.getElementById('password').value = '';
+                    document.getElementById('password').focus();
+                }
+            });
+            
+            // Sistema de mostrar/esconder senha
+            const passwordToggle = document.getElementById('passwordToggle');
+            const passwordInput = document.getElementById('password');
+            
+            if (passwordToggle && passwordInput) {
+                passwordToggle.addEventListener('click', function() {
+                    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                    passwordInput.setAttribute('type', type);
+                    
+                    // Alterar ícone
+                    const icon = this.querySelector('i');
+                    if (type === 'text') {
+                        icon.classList.remove('fa-eye');
+                        icon.classList.add('fa-eye-slash');
+                    } else {
+                        icon.classList.remove('fa-eye-slash');
+                        icon.classList.add('fa-eye');
+                    }
+                });
+            }
+            
+            // Focar no campo de email ao carregar
+            document.getElementById('email').focus();
+        });
+
         // Sistema de Loading SIMPLIFICADO
         function showLoading() {
             const loadingOverlay = document.getElementById('globalLoading');
@@ -433,7 +692,7 @@
         }
 
         // Inicialização da aplicação - RÁPIDA
-        document.addEventListener('DOMContentLoaded', async function() {
+        async function initializeApp() {
             console.log('DOM carregado, inicializando aplicação...');
             
             // Mostrar loading imediatamente
@@ -453,13 +712,15 @@
                 // Em caso de erro, esconder o loading também
                 hideLoading();
             }
-        });
+        }
 
         // Botão Sair - Redireciona para a página inicial
         document.getElementById('logoutBtn').addEventListener('click', function(e) {
             e.preventDefault();
-            // Aqui você pode adicionar qualquer lógica de logout se necessário
-            window.location.href = 'index.html';
+            // Limpar estado de login
+            localStorage.removeItem('isLoggedIn');
+            // Recarregar a página para voltar ao login
+            window.location.reload();
         });
     </script>
     <script src="./scripts/index.js"></script>

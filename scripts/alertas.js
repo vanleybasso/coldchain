@@ -73,7 +73,7 @@ async function loadAlertsData() {
     }
 }
 
-// Gerar alertas baseados nos dados dos sensores - ATUALIZADA
+// Gerar alertas baseados nos dados dos sensores - ATUALIZADA para nova faixa -2°C a 10°C
 function generateAlertsFromSensorData(sensorData) {
     const alerts = [];
     const now = new Date();
@@ -100,7 +100,7 @@ function generateAlertsFromSensorData(sensorData) {
         let severity = 'info';
         let description = '';
         
-        // Determinar gravidade baseada na temperatura
+        // Determinar gravidade baseada na temperatura - ATUALIZADO para nova faixa
         if (sensorId === 'externo') {
             // Sensor externo - alertas diferentes
             if (temperature > 35) {
@@ -113,16 +113,13 @@ function generateAlertsFromSensorData(sensorData) {
                 return; // Não criar alerta para temperatura externa normal
             }
         } else {
-            // Sensores internos
-            if (temperature > 7) {
+            // Sensores internos - NOVA FAIXA: -2°C a 10°C é normal
+            if (temperature > 10 || temperature < -2) {
                 severity = 'critical';
-                description = 'Temperatura crítica na carga';
-            } else if (temperature > 5) {
+                description = 'Temperatura crítica fora da faixa ideal (-2°C a 10°C)';
+            } else if (temperature > 8 || temperature < 0) {
                 severity = 'warning';
-                description = 'Temperatura acima do ideal';
-            } else if (temperature < 2) {
-                severity = 'warning';
-                description = 'Temperatura abaixo do ideal';
+                description = 'Temperatura próxima dos limites da faixa ideal';
             } else {
                 return; // Não criar alerta para temperatura normal
             }
@@ -213,7 +210,7 @@ function getSystemAlerts() {
     ];
 }
 
-// Dados de fallback para alertas - ATUALIZADA
+// Dados de fallback para alertas - ATUALIZADA para nova faixa
 function getFallbackAlerts() {
     const now = new Date();
     const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
@@ -223,11 +220,11 @@ function getFallbackAlerts() {
         {
             id: generateAlertId(),
             vehicle: 'KG8000003',
-            sensor: 'Dianteiro Direito',
-            sensorId: 'dianteiro-direito',
+            sensor: 'Central Direito',
+            sensorId: 'central-direito',
             severity: 'critical',
-            temperature: 6.8,
-            description: 'Temperatura crítica na carga',
+            temperature: 11.5, // Acima de 10°C - crítico
+            description: 'Temperatura crítica fora da faixa ideal (-2°C a 10°C)',
             timestamp: now.toISOString(),
             status: 'active',
             history: [
@@ -244,8 +241,26 @@ function getFallbackAlerts() {
             sensor: 'Central Esquerdo',
             sensorId: 'central-esquerdo',
             severity: 'warning',
-            temperature: 5.8,
-            description: 'Temperatura acima do ideal',
+            temperature: 8.5, // Próximo do limite superior
+            description: 'Temperatura próxima dos limites da faixa ideal',
+            timestamp: oneHourAgo.toISOString(),
+            status: 'active',
+            history: [
+                {
+                    action: 'Alerta criado',
+                    user: 'Sistema',
+                    timestamp: oneHourAgo.toISOString()
+                }
+            ]
+        },
+        {
+            id: generateAlertId(),
+            vehicle: 'KG8000003',
+            sensor: 'Fundo Esquerdo',
+            sensorId: 'fundo-esquerdo',
+            severity: 'critical',
+            temperature: -3.2, // Abaixo de -2°C - crítico
+            description: 'Temperatura crítica fora da faixa ideal (-2°C a 10°C)',
             timestamp: oneHourAgo.toISOString(),
             status: 'active',
             history: [
@@ -270,29 +285,6 @@ function getFallbackAlerts() {
                 {
                     action: 'Alerta criado',
                     user: 'Sistema',
-                    timestamp: oneHourAgo.toISOString()
-                }
-            ]
-        },
-        {
-            id: generateAlertId(),
-            vehicle: 'KG8000003',
-            sensor: 'Refrigerador',
-            sensorId: 'refrigerator',
-            severity: 'warning',
-            temperature: null,
-            description: 'Consumo de energia acima do normal',
-            timestamp: twoHoursAgo.toISOString(),
-            status: 'resolved',
-            history: [
-                {
-                    action: 'Alerta criado',
-                    user: 'Sistema',
-                    timestamp: twoHoursAgo.toISOString()
-                },
-                {
-                    action: 'Alerta resolvido',
-                    user: 'Operador',
                     timestamp: oneHourAgo.toISOString()
                 }
             ]

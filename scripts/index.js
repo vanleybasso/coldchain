@@ -132,7 +132,7 @@ function calculateAverageTemperature() {
     return '--';
 }
 
-// Contar alertas ativos
+// FUNÇÃO MODIFICADA: Nova faixa de temperatura -2°C a 10°C
 function countActiveAlerts() {
     let alertCount = 0;
     
@@ -142,17 +142,16 @@ function countActiveAlerts() {
             return;
         }
         
-        if (sensor.temperature > 7) {
+        // NOVA FAIXA: -2°C a 10°C é normal
+        if (sensor.temperature > 15) {
             alertCount++; // Crítico
-        } else if (sensor.temperature > 5) {
+        } else if (sensor.temperature > 10 || sensor.temperature < -2) {
             alertCount++; // Alerta
         }
     });
     
     return alertCount;
 }
-
-// REMOVIDO: Função generateRandomFuelEconomy
 
 // Contar sensores configurados
 function countConfiguredSensors() {
@@ -165,14 +164,15 @@ function countConfiguredSensors() {
     return count;
 }
 
-// Determinar status da temperatura
+// FUNÇÃO MODIFICADA: Nova faixa de temperatura -2°C a 10°C
 function getTemperatureStatus(temperature) {
     if (isNaN(temperature)) {
         return 'Sem Dados';
     }
     
-    if (temperature >= 2 && temperature <= 5) return 'Normal';
-    if (temperature > 5 && temperature <= 7) return 'Alerta';
+    // NOVA FAIXA: -2°C a 10°C é normal
+    if (temperature >= -2 && temperature <= 10) return 'Normal';
+    if ((temperature > -5 && temperature < -2) || (temperature > 10 && temperature <= 15)) return 'Alerta';
     return 'Crítico';
 }
 
@@ -235,12 +235,13 @@ function createSensorTooltip(sensorData, lastUpdate) {
     return tooltipHTML;
 }
 
-// Função para determinar classe de status do sensor
+// FUNÇÃO MODIFICADA: Nova faixa de temperatura -2°C a 10°C
 function getSensorStatusClass(temperature, isExternal = false) {
     if (isExternal) return 'sensor-external';
     
-    if (temperature >= 2 && temperature <= 5) return 'sensor-normal';
-    if (temperature > 5 && temperature <= 7) return 'sensor-warning';
+    // NOVA FAIXA: -2°C a 10°C é normal
+    if (temperature >= -2 && temperature <= 10) return 'sensor-normal';
+    if ((temperature > -5 && temperature < -2) || (temperature > 10 && temperature <= 15)) return 'sensor-warning';
     return 'sensor-critical';
 }
 
@@ -346,8 +347,9 @@ function populateVehicleTable() {
     let tempClass = 'temp-normal';
     const tempValue = parseFloat(avgTemperature);
     if (!isNaN(tempValue)) {
-        if (tempValue > 7) tempClass = 'temp-alert';
-        else if (tempValue > 5) tempClass = 'temp-warning';
+        // NOVA FAIXA: -2°C a 10°C é normal
+        if (tempValue > 15) tempClass = 'temp-alert';
+        else if (tempValue > 10 || tempValue < -2) tempClass = 'temp-warning';
     }
     
     // Criar tooltip de sensores
@@ -564,9 +566,10 @@ function createStatusChart() {
     let statusData = [0, 0, 0]; // [Normal, Alerta, Crítico]
     
     if (!isNaN(avgTemperature)) {
-        if (avgTemperature >= 2 && avgTemperature <= 5) {
+        // NOVA FAIXA: -2°C a 10°C é normal
+        if (avgTemperature >= -2 && avgTemperature <= 10) {
             statusData[0] = 1; // Normal
-        } else if (avgTemperature > 5 && avgTemperature <= 7) {
+        } else if ((avgTemperature > -5 && avgTemperature < -2) || (avgTemperature > 10 && avgTemperature <= 15)) {
             statusData[1] = 1; // Alerta
         } else {
             statusData[2] = 1; // Crítico
@@ -680,10 +683,11 @@ function openVehicleModal(vehicleId) {
                 statusClass = 'normal';
                 statusText = 'Normal';
             } else {
-                if (sensor.temperature > 7) {
+                // NOVA FAIXA: -2°C a 10°C é normal
+                if (sensor.temperature > 15) {
                     statusClass = 'alert';
                     statusText = 'Crítico';
-                } else if (sensor.temperature > 5) {
+                } else if (sensor.temperature > 10 || sensor.temperature < -2) {
                     statusClass = 'warning';
                     statusText = 'Alerta';
                 } else {
@@ -891,9 +895,10 @@ function startRealTimeUpdates() {
                 let statusData = [0, 0, 0];
                 
                 if (!isNaN(avgTemperature)) {
-                    if (avgTemperature >= 2 && avgTemperature <= 5) {
+                    // NOVA FAIXA: -2°C a 10°C é normal
+                    if (avgTemperature >= -2 && avgTemperature <= 10) {
                         statusData[0] = 1;
-                    } else if (avgTemperature > 5 && avgTemperature <= 7) {
+                    } else if ((avgTemperature > -5 && avgTemperature < -2) || (avgTemperature > 10 && avgTemperature <= 15)) {
                         statusData[1] = 1;
                     } else {
                         statusData[2] = 1;
@@ -920,8 +925,6 @@ function useFallbackData() {
     document.getElementById('total-vehicles').querySelector('.loading-content').textContent = '1';
     document.getElementById('avg-temperature').querySelector('.loading-content').textContent = '3.2°C';
     document.getElementById('active-alerts').querySelector('.loading-content').textContent = '1';
-    
-    // REMOVIDO: Dados de combustível
     
     // Remover loading
     document.querySelectorAll('.card').forEach(card => {

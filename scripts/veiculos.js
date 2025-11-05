@@ -148,8 +148,9 @@ function populateVehicleTable() {
         let tempClass = 'temp-normal';
         const tempValue = parseFloat(avgTemperature);
         if (!isNaN(tempValue)) {
-            if (tempValue > 7) tempClass = 'temp-alert';
-            else if (tempValue > 5) tempClass = 'temp-warning';
+            // NOVA FAIXA: -2°C a 10°C é normal
+            if (tempValue > 15) tempClass = 'temp-alert';
+            else if (tempValue > 10 || tempValue < -2) tempClass = 'temp-warning';
         }
         
         // Criar tooltip de sensores
@@ -210,7 +211,7 @@ function getStatusBadgeClass(status) {
     }
 }
 
-// Determinar status da temperatura
+// FUNÇÃO MODIFICADA: Nova faixa de temperatura -2°C a 10°C
 function getTemperatureStatus(sensorData) {
     const avgTemp = calculateAverageTemperature(sensorData);
     if (avgTemp === '--°C') {
@@ -222,8 +223,9 @@ function getTemperatureStatus(sensorData) {
         return 'Sem Dados';
     }
     
-    if (tempValue >= 2 && tempValue <= 5) return 'Normal';
-    if (tempValue > 5 && tempValue <= 7) return 'Alerta';
+    // NOVA FAIXA: -2°C a 10°C é normal
+    if (tempValue >= -2 && tempValue <= 10) return 'Normal';
+    if ((tempValue > -5 && tempValue < -2) || (tempValue > 10 && tempValue <= 15)) return 'Alerta';
     return 'Crítico';
 }
 
@@ -500,12 +502,13 @@ function createSensorTooltip(sensorData, lastUpdate) {
     return tooltipHTML;
 }
 
-// Função para determinar classe de status do sensor
+// FUNÇÃO MODIFICADA: Nova faixa de temperatura -2°C a 10°C
 function getSensorStatusClass(temperature, isExternal = false) {
     if (isExternal) return 'sensor-external';
     
-    if (temperature >= 2 && temperature <= 5) return 'sensor-normal';
-    if (temperature > 5 && temperature <= 7) return 'sensor-warning';
+    // NOVA FAIXA: -2°C a 10°C é normal
+    if (temperature >= -2 && temperature <= 10) return 'sensor-normal';
+    if ((temperature > -5 && temperature < -2) || (temperature > 10 && temperature <= 15)) return 'sensor-warning';
     return 'sensor-critical';
 }
 

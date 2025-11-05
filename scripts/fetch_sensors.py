@@ -4,13 +4,14 @@ from datetime import datetime, timedelta
 import os
 import time
 import pytz
+import schedule
 
 def fetch_current_sensor_data():
     """
     Busca os dados MAIS RECENTES de todos os sensores para o dashboard
     """
     try:
-        print("Conectando ao banco PostgreSQL para dados atuais dos sensores...")
+        print(f"[{datetime.now().strftime('%d/%m/%Y %H:%M:%S')}] Conectando ao banco PostgreSQL para dados atuais dos sensores...")
         
         conn = psycopg2.connect(
             host="10.0.0.101",
@@ -179,7 +180,7 @@ def fetch_sensor_history_with_time_range(sensor_index, time_range='6h'):
                 "temperature": float(temperature) if temperature is not None else 0.0,
                 "humidity": float(humidity) if humidity is not None else 0.0,
                 "timestamp": time_position_brazil.isoformat()
-            })
+            });
         
         cursor.close()
         conn.close()
@@ -220,23 +221,24 @@ def generate_mock_history_for_period(time_range, sensor_index):
     # Definir parâmetros baseados no período
     if time_range == '1h':
         points = 12  # 5 minutos cada
-        base_temp = 3.5 if sensor_name != 'externo' else 24.0
+        # AJUSTE: Temperaturas base ajustadas para nova faixa -2°C a 10°C
+        base_temp = 4.0 if sensor_name != 'externo' else 24.0
         minutes_between_points = 5
     elif time_range == '6h':
         points = 12  # 30 minutos cada
-        base_temp = 3.5 if sensor_name != 'externo' else 24.0
+        base_temp = 4.0 if sensor_name != 'externo' else 24.0
         minutes_between_points = 30
     elif time_range == '12h':
         points = 24  # 30 minutos cada para ter mais pontos
-        base_temp = 3.5 if sensor_name != 'externo' else 24.0
+        base_temp = 4.0 if sensor_name != 'externo' else 24.0
         minutes_between_points = 30
     elif time_range == '24h':
         points = 24  # 1 hora cada
-        base_temp = 3.5 if sensor_name != 'externo' else 24.0
+        base_temp = 4.0 if sensor_name != 'externo' else 24.0
         minutes_between_points = 60
     else:
         points = 12
-        base_temp = 3.5 if sensor_name != 'externo' else 24.0
+        base_temp = 4.0 if sensor_name != 'externo' else 24.0
         minutes_between_points = 30
     
     # Ajustar base_temp para sensor central direito (normalmente mais quente)
@@ -255,7 +257,7 @@ def generate_mock_history_for_period(time_range, sensor_index):
         
         # Variação realista baseada no tempo
         time_factor = i / (points - 1) if points > 1 else 0.5
-        temp_variation = (time_factor - 0.5) * 2  # Varia de -1 a +1
+        temp_variation = (time_factor - 0.5) * 3  # Varia de -1.5 a +1.5
         
         temp = round(base_temp + temp_variation, 1)
         humidity = round(50 + temp_variation * 10, 0)
@@ -367,8 +369,15 @@ def save_history_for_all_periods():
     
     print(f"Arquivo de compatibilidade salvo em: {compat_file_path}")
 
-if __name__ == "__main__":
+def update_sensor_data():
+    """
+    Função principal que atualiza todos os dados dos sensores
+    """
     try:
+        print(f"\n{'='*60}")
+        print(f"[{datetime.now().strftime('%d/%m/%Y %H:%M:%S')}] INICIANDO ATUALIZAÇÃO AUTOMÁTICA DOS SENSORES")
+        print(f"{'='*60}")
+        
         # Buscar dados ATUAIS dos sensores para o dashboard
         print("=== BUSCANDO DADOS ATUAIS PARA DASHBOARD ===")
         current_data = fetch_current_sensor_data()
@@ -384,7 +393,44 @@ if __name__ == "__main__":
         # Salvar históricos para todos os períodos
         save_history_for_all_periods()
         
-    except KeyboardInterrupt:
-        print("\nExecução interrompida pelo usuário")
+        print(f"[{datetime.now().strftime('%d/%m/%Y %H:%M:%S')}] ATUALIZAÇÃO CONCLUÍDA COM SUCESSO!")
+        print(f"{'='*60}\n")
+        
     except Exception as e:
-        print(f"Erro geral na execução: {e}")
+        print(f"ERRO na atualização automática: {e}")
+        print(f"{'='*60}\n")
+
+def main():
+    """
+    Função principal que inicia a atualização automática
+    """
+    print("=== SISTEMA DE ATUALIZAÇÃO AUTOMÁTICA DE SENSORES ===")
+    print("Configurando atualização automática a cada 3 minutos...")
+    
+    # Executar imediatamente ao iniciar
+    update_sensor_data()
+    
+    # Agendar atualização a cada 3 minutos
+    schedule.every(3).minutes.do(update_sensor_data)
+    
+    print("Sistema iniciado! Atualizações automáticas configuradas a cada 3 minutos.")
+    print("Pressione Ctrl+C para parar o sistema.\n")
+    
+    try:
+        while True:
+            schedule.run_pending()
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("\n\nSistema interrompido pelo usuário.")
+        print("Atualizações automáticas paradas.")
+
+if __name__ == "__main__":
+    # Verificar se a biblioteca schedule está instalada
+    try:
+        import schedule
+    except ImportError:
+        print("ERRO: Biblioteca 'schedule' não encontrada!")
+        print("Instale com: pip install schedule")
+        exit(1)
+    
+    main()

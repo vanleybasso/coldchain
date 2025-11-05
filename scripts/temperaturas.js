@@ -669,9 +669,10 @@ function getCurrentSensorTemperatures() {
             let status = 'normal';
             if (sensorName !== 'externo') {
                 const temp = sensor.temperature;
-                if (temp > 7) {
+                // NOVA FAIXA: -2°C a 10°C é normal
+                if (temp > 15) {
                     status = 'critical';
-                } else if (temp > 5) {
+                } else if (temp > 10 || temp < -2) {
                     status = 'warning';
                 }
             }
@@ -756,21 +757,21 @@ function getTimeDataForRange(range) {
 }
 
 function getTemperatureDataForRange(range) {
-    const baseTemp = 3.5;
+    const baseTemp = 4.0; // Ajustado para nova faixa
     let data = [];
     
     switch(range) {
         case '1h':
-            data = [3.2, 3.3, 3.4, 3.5, 3.6, 3.5, 3.4, 3.3, 3.2, 3.3, 3.4, 3.5];
+            data = [3.8, 3.9, 4.0, 4.1, 4.2, 4.1, 4.0, 3.9, 3.8, 3.9, 4.0, 4.1];
             break;
         case '6h':
-            data = [3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.6, 3.5, 3.4, 3.3, 3.4];
+            data = [3.7, 3.8, 3.9, 4.0, 4.1, 4.2, 4.3, 4.2, 4.1, 4.0, 3.9, 4.0];
             break;
         case '12h':
-            data = [2.9, 3.0, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.5, 3.4, 3.3, 3.4];
+            data = [3.5, 3.6, 3.7, 3.8, 3.9, 4.0, 4.1, 4.2, 4.1, 4.0, 3.9, 4.0];
             break;
         case '24h':
-            data = [2.8, 2.9, 3.0, 3.1, 3.2, 3.3, 3.4, 3.5, 3.4, 3.3, 3.2, 3.3];
+            data = [3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 4.0, 4.1, 4.0, 3.9, 3.8, 3.9];
             break;
     }
     

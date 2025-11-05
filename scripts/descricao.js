@@ -227,6 +227,7 @@ function getSensorLocation(sensorName) {
     return locations[sensorName] || 'Localização desconhecida';
 }
 
+// FUNÇÃO MODIFICADA: Nova faixa de temperatura -2°C a 10°C
 function getTemperatureStatus(temperature, isExternal = false) {
     if (temperature === 0.0) {
         return 'Não Configurado';
@@ -234,8 +235,9 @@ function getTemperatureStatus(temperature, isExternal = false) {
     
     if (isExternal) return 'Normal';
     
-    if (temperature >= 2 && temperature <= 5) return 'Normal';
-    if (temperature > 5 && temperature <= 7) return 'Alerta';
+    // NOVA FAIXA: -2°C a 10°C é normal
+    if (temperature >= -2 && temperature <= 10) return 'Normal';
+    if ((temperature > -5 && temperature < -2) || (temperature > 10 && temperature <= 15)) return 'Alerta';
     return 'Crítico';
 }
 
@@ -366,7 +368,8 @@ function generateMockHistory(hours = 12) {
     
     sensorNames.forEach(sensorName => {
         const history = [];
-        const baseTemp = sensorName === 'externo' ? 22 : 3.5;
+        // AJUSTE: Temperaturas base ajustadas para nova faixa
+        const baseTemp = sensorName === 'externo' ? 22 : 4.0; // Temperatura média dentro da nova faixa
         const baseHumidity = sensorName === 'externo' ? 65 : 55;
         
         const points = hours;
@@ -379,10 +382,11 @@ function generateMockHistory(hours = 12) {
                 tempVariation = Math.sin(i * Math.PI / 6) * 6 + (Math.random() - 0.5) * 2;
                 humidityVariation = Math.sin(i * Math.PI / 6) * 15 + (Math.random() - 0.5) * 5;
             } else if (sensorName === 'central-direito') {
-                tempVariation = (Math.random() - 0.5) * 2.5;
+                // AJUSTE: Variação menor para ficar dentro da nova faixa
+                tempVariation = (Math.random() - 0.5) * 3;
                 humidityVariation = (Math.random() - 0.5) * 8;
             } else {
-                tempVariation = (Math.random() - 0.5) * 1.2;
+                tempVariation = (Math.random() - 0.5) * 2;
                 humidityVariation = (Math.random() - 0.5) * 4;
             }
             
@@ -439,7 +443,7 @@ function checkDoorStatus() {
     const doorSensors = ['central-direito', 'central-esquerdo'];
     for (const sensorName of doorSensors) {
         const sensor = sensorData[sensorName];
-        if (sensor && sensor.temperatureValue > 7 && sensor.temperatureValue !== 0.0) {
+        if (sensor && sensor.temperatureValue > 15 && sensor.temperatureValue !== 0.0) { // Ajustado para nova faixa
             return true;
         }
     }
@@ -554,15 +558,17 @@ function calculateAverageTemperature() {
     }
 }
 
+// FUNÇÃO MODIFICADA: Nova faixa de temperatura -2°C a 10°C
 function updateVehicleStatus(avgTemperature) {
     const statusElement = document.getElementById('vehicle-status');
     
     if (avgTemperature !== '--') {
         const tempValue = parseFloat(avgTemperature);
-        if (tempValue >= 2 && tempValue <= 5) {
+        // NOVA FAIXA: -2°C a 10°C é normal
+        if (tempValue >= -2 && tempValue <= 10) {
             statusElement.textContent = 'Normal';
             statusElement.className = 'status-badge status-normal';
-        } else if (tempValue > 5 && tempValue <= 7) {
+        } else if ((tempValue > -5 && tempValue < -2) || (tempValue > 10 && tempValue <= 15)) {
             statusElement.textContent = 'Alerta';
             statusElement.className = 'status-badge status-warning';
         } else {
@@ -575,15 +581,17 @@ function updateVehicleStatus(avgTemperature) {
     }
 }
 
+// FUNÇÃO MODIFICADA: Nova faixa de temperatura -2°C a 10°C
 function updateTemperatureStatus(avgTemperature) {
     const tempStatusElement = document.getElementById('temp-status');
     
     if (avgTemperature !== '--') {
         const tempValue = parseFloat(avgTemperature);
-        if (tempValue >= 2 && tempValue <= 5) {
+        // NOVA FAIXA: -2°C a 10°C é normal
+        if (tempValue >= -2 && tempValue <= 10) {
             tempStatusElement.innerHTML = '<i class="fas fa-check-circle"></i> Dentro da faixa ideal';
             tempStatusElement.className = 'dashboard-change positive';
-        } else if (tempValue > 5 && tempValue <= 7) {
+        } else if ((tempValue > -5 && tempValue < -2) || (tempValue > 10 && tempValue <= 15)) {
             tempStatusElement.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Fora da faixa ideal';
             tempStatusElement.className = 'dashboard-change negative';
         } else {
@@ -596,6 +604,7 @@ function updateTemperatureStatus(avgTemperature) {
     }
 }
 
+// FUNÇÃO MODIFICADA: Nova faixa de temperatura -2°C a 10°C
 function updateRefrigeratorStatus(avgTemperature) {
     const refrigeratorChangeElement = document.getElementById('refrigerator-change');
     const refrigeratorStatusElement = document.getElementById('refrigerator-status');
@@ -603,7 +612,8 @@ function updateRefrigeratorStatus(avgTemperature) {
     if (avgTemperature !== '--') {
         const tempValue = parseFloat(avgTemperature);
         
-        if (tempValue >= 2 && tempValue <= 7) {
+        // NOVA FAIXA: -2°C a 10°C é operação normal
+        if (tempValue >= -2 && tempValue <= 10) {
             refrigeratorStatusElement.textContent = 'Ligado';
             refrigeratorChangeElement.innerHTML = '<i class="fas fa-check-circle"></i> Operação normal';
             refrigeratorChangeElement.className = 'dashboard-change positive';
