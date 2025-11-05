@@ -1,37 +1,37 @@
 {
   "externo": {
-    "temperature": 23.9,
+    "temperature": 24.8,
     "humidity": 0.0,
-    "last_read": "2025-11-05T10:28:24-03:00"
+    "last_read": "2025-11-05T11:52:22-03:00"
   },
   "dianteiro-direito": {
-    "temperature": 23.6,
-    "humidity": 57.0,
-    "last_read": "2025-11-05T10:28:24-03:00"
+    "temperature": 23.8,
+    "humidity": 54.0,
+    "last_read": "2025-11-05T11:52:22-03:00"
   },
   "dianteiro-esquerdo": {
-    "temperature": 23.7,
-    "humidity": 55.0,
-    "last_read": "2025-11-05T10:28:24-03:00"
+    "temperature": 23.9,
+    "humidity": 52.0,
+    "last_read": "2025-11-05T11:52:22-03:00"
   },
   "central-direito": {
-    "temperature": 23.7,
-    "humidity": 56.0,
-    "last_read": "2025-11-05T10:28:24-03:00"
+    "temperature": 23.9,
+    "humidity": 53.0,
+    "last_read": "2025-11-05T11:52:22-03:00"
   },
   "central-esquerdo": {
-    "temperature": 23.8,
-    "humidity": 56.0,
-    "last_read": "2025-11-05T10:28:24-03:00"
+    "temperature": 23.9,
+    "humidity": 53.0,
+    "last_read": "2025-11-05T11:52:22-03:00"
   },
   "fundo-direito": {
-    "temperature": 23.6,
-    "humidity": 58.0,
-    "last_read": "2025-11-05T10:28:24-03:00"
+    "temperature": 23.9,
+    "humidity": 56.0,
+    "last_read": "2025-11-05T11:52:22-03:00"
   },
   "fundo-esquerdo": {
-    "temperature": 23.6,
-    "humidity": 56.0,
-    "last_read": "2025-11-05T10:28:24-03:00"
+    "temperature": 23.8,
+    "humidity": 53.0,
+    "last_read": "2025-11-05T11:52:22-03:00"
   }
 }
